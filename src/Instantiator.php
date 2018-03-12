@@ -37,7 +37,8 @@ use CodeInc\Instantiator\Exceptions\ClassNotFoundException;
  * @author Joan Fabrégat <joan@codeinc.fr>
  * @todo add object type hint when min compatibility >= 7.2
  */
-class Instantiator {
+class Instantiator
+{
 	/**
 	 * Instantiated objects stack.
 	 *
