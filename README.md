@@ -36,7 +36,7 @@ class MySecondService implements ServiceInterface {
 // calling the second service, the service manager is going to first instantiated MyFirstService
 // then instantiate MySecondService with MyFirstService as a parameter.
 $serviceManager = new ServiceManager();
-$mySecondService = $serviceManager->getService(MySecondService::class);
+$mySecondService = $serviceManager->getInstance(MySecondService::class);
 $mySecondService->helloWorld();
 
 // you also can add external objects to makes them available to the servides,

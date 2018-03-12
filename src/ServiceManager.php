@@ -22,7 +22,10 @@
 declare(strict_types = 1);
 namespace CodeInc\ServiceManager;
 use CodeInc\ServiceManager\Exceptions\InterfaceWithoutAliasException;
+use CodeInc\ServiceManager\Exceptions\NewInstanceException;
 use CodeInc\ServiceManager\Exceptions\NotAnObjectException;
+use CodeInc\ServiceManager\Exceptions\NotAServiceException;
+use CodeInc\ServiceManager\Exceptions\ParamValueException;
 use CodeInc\ServiceManager\Exceptions\ServiceManagerException;
 use CodeInc\ServiceManager\Exceptions\ParamTypeException;
 use CodeInc\ServiceManager\Exceptions\ClassNotFoundException;
@@ -40,7 +43,7 @@ class ServiceManager implements ServiceInterface {
 	 * Instantiated objects stack.
 	 *
 	 * @see ServiceManager::addService()
-	 * @see ServiceManager::getService()
+	 * @see ServiceManager::getInstance()
 	 * @var object[]
 	 */
 	private $services = [];
@@ -65,9 +68,10 @@ class ServiceManager implements ServiceInterface {
 	}
 
 	/**
-	 * Adds an instantiated service. This can be usefull when you need to make available services which requires
-	 * a specific configuration. It also allows to make available objects which are not technically services like
-	 * the ServerRequest object or Doctrine's EntityManager.
+	 * Adds an instantiated service. This can be usefull when you need to make
+     * available services which requires a specific configuration. It also allows
+     * to make available objects which are not technically services like the
+     * ServerRequest object or Doctrine's EntityManager.
 	 *
 	 * @param ServiceInterface|object $service
 	 * @throws NotAnObjectException
@@ -97,8 +101,9 @@ class ServiceManager implements ServiceInterface {
 	}
 
 	/**
-	 * Maps an interface to a service class. This is the way to tell the service manager to use
-	 * a specific class when it encounters an interface as a type hint.
+	 * Maps an interface to a service class. This is the way to tell the service
+     * manager to use a specific class when it encounters an interface as a type
+     * hint.
 	 *
 	 * @param string $serviceClass
 	 * @param string $alias
@@ -123,9 +128,10 @@ class ServiceManager implements ServiceInterface {
 	}
 
 	/**
-	 * Returns a service instance. If the service was used previously, returns the previous instance.
-	 * If the service was added using addService(), returns the added instance. If the service was never
-	 * called, instantiate the service and all of its requirements.
+	 * Returns a service instance. If the service was used previously, returns
+     * the previous instance. If the service was added using addService(),
+     * returns the added instance. If the service was never called, instantiate
+     * the service and all of its requirements.
 	 *
 	 * @param string $serviceClass
 	 * @return object
@@ -135,7 +141,7 @@ class ServiceManager implements ServiceInterface {
 	 * @throws ServiceManagerException
 	 * @throws \ReflectionException
 	 */
-	public function getService(string $serviceClass)
+	public function getInstance(string $serviceClass)
 	{
 		// if there is an instance already available to the given class
 		if (isset($this->services[$serviceClass])) {
@@ -158,13 +164,8 @@ class ServiceManager implements ServiceInterface {
 			throw new InterfaceWithoutAliasException($serviceClass, $this);
 		}
 
-		// checks if the class is a service
-		if ($reflectionClass->isSubclassOf(ServiceInterface::class)) {
-			throw new NotAnObjectException($serviceClass, $this);
-		}
-
 		// if the class was never added or instantiated, we instantiate it
-		$service = $this->instantiate($reflectionClass);
+		$service = $this->newInstance($reflectionClass);
 		$this->addService($service);
 		return $service;
 	}
@@ -191,7 +192,7 @@ class ServiceManager implements ServiceInterface {
 	/**
 	 * Alias of getService()
 	 *
-	 * @uses ServiceManager::getService()
+	 * @uses ServiceManager::getInstance()
 	 * @param string $serviceClass
 	 * @return object
 	 * @throws ServiceManagerException
@@ -199,27 +200,27 @@ class ServiceManager implements ServiceInterface {
 	 */
 	public function __invoke(string $serviceClass)
 	{
-		return $this->getService($serviceClass);
+		return $this->getInstance($serviceClass);
 	}
 
 	/**
 	 * @param \ReflectionClass $reflectionClass
 	 * @return object
+	 * @throws NewInstanceException
 	 * @throws ServiceManagerException
 	 */
-	private function instantiate(\ReflectionClass $reflectionClass)
+	private function newInstance(\ReflectionClass $reflectionClass)
 	{
 		try {
-			return $reflectionClass->newInstanceArgs($this->getCustructorParams($reflectionClass));
+			return $reflectionClass->newInstanceArgs(
+			    $this->getCustructorParams($reflectionClass)
+            );
 		}
 		catch (ServiceManagerException $exception) {
 			throw $exception;
 		}
 		catch (\Throwable $exception) {
-			throw new ServiceManagerException(
-				sprintf("Error while instantiating the class %s", $reflectionClass->getName()),
-				$this, null, $exception
-			);
+            throw new NewInstanceException($reflectionClass->getName(), $this);
 		}
 	}
 
@@ -233,6 +234,7 @@ class ServiceManager implements ServiceInterface {
 	 * @throws NotAnObjectException
 	 * @throws ServiceManagerException
 	 * @throws \ReflectionException
+     * @throws ParamValueException
 	 */
 	private function getCustructorParams(\ReflectionClass $reflectionClass):array
 	{
@@ -243,12 +245,12 @@ class ServiceManager implements ServiceInterface {
 				$args[] = $this->getCustructorParamValue($reflectionParameter);
 			}
 			catch (ParamTypeException $exception) {
-				throw new ServiceManagerException(
-					sprintf("Error while preparing the value of the parameter %s (#%s) "
-						."of the constructor: %s",
-						"\${$reflectionParameter->getName()}", $number + 1, $exception->getMessage()),
-					$this
-				);
+                throw new ParamValueException(
+                    $reflectionParameter->getName(),
+                    $number + 1,
+                    $exception->getMessage(),
+                    $this
+                );
 			}
 		}
 		return $args;
@@ -287,8 +289,17 @@ class ServiceManager implements ServiceInterface {
 				);
 			}
 
+            // if the class is a not service
+            if (is_subclass_of($reflectionParameter->getType()->getName(),
+                ServiceInterface::class)) {
+                throw new NotAServiceException(
+                    $reflectionParameter->getType()->getName(),
+                    $this
+                );
+            }
+
 			// instantiating the class
-			return $this->getService($reflectionParameter->getType()->getName());
+			return $this->getInstance($reflectionParameter->getType()->getName());
 		}
 
 		// optionnal param
