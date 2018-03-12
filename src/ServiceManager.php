@@ -90,33 +90,53 @@ class ServiceManager implements ServiceInterface {
 
 		// maps the service interfaces
 		foreach ($reflectionClass->getInterfaces() as $interface) {
-			$this->addAlias($reflectionClass->getName(), $interface->getName(), false);
+			$this->addAlias(
+			    $reflectionClass->getName(),
+                $interface->getName(),
+                false
+            );
 		}
 
 		// maps the service parent classes
 		$parent = $reflectionClass;
 		while ($parent = $parent->getParentClass()) {
-			$this->addAlias($reflectionClass->getName(), $parent->getName(), false);
+			$this->addAlias(
+			    $reflectionClass->getName(),
+                $parent->getName(),
+                false
+            );
 		}
 	}
 
 	/**
-	 * Maps an interface to a service class. This is the way to tell the service
-     * manager to use a specific class when it encounters an interface as a type
-     * hint.
+	 * Adds an alias for a class of an interface. This is the way to tell the
+     * service manager to use a specific class when it encounters an interface
+     * as a type hint.
 	 *
 	 * @param string $serviceClass
 	 * @param string $alias
 	 * @param bool $replace
 	 * @return bool
 	 */
-	public function addAlias(string $serviceClass, string $alias, bool $replace = true):bool
+	public function addAlias(string $serviceClass, string $alias,
+        bool $replace = true):bool
 	{
 		if ($replace === true || !isset($this->aliases[$alias])) {
 			$this->aliases[$alias] = $serviceClass;
 		}
 		return false;
 	}
+
+    /**
+     * Verifies if an alias exist for a class / interface.
+     *
+     * @param string $class
+     * @return null|string
+     */
+	public function hasAlias(string $class):?string
+    {
+        return $this->aliases[$class] ?? null;
+    }
 
 	/**
 	 * @param string $class
