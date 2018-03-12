@@ -231,11 +231,14 @@ class Instantiator
     {
         try {
             $reflectionClass = new \ReflectionClass($class);
-            $args = [];
-            foreach ($reflectionClass->getMethod("__construct")->getParameters() as $number => $param) {
-                $args[] = $this->getCustructorParamValue($param, $reflectionClass, $number + 1);
+            if ($reflectionClass->hasMethod("__construct")) {
+                $args = [];
+                foreach ($reflectionClass->getMethod("__construct")->getParameters() as $number => $param) {
+                    $args[] = $this->getCustructorParamValue($param, $reflectionClass, $number + 1);
+                }
+                return $reflectionClass->newInstanceArgs($args);
             }
-            return $reflectionClass->newInstanceArgs($args);
+            return $reflectionClass->newInstance();
         }
         catch (\Throwable $exception) {
             throw new NewInstanceException($class,
