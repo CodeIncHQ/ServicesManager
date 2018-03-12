@@ -154,7 +154,7 @@ class Instantiator
      * returns the added instance.
 	 *
 	 * @param string $class
-	 * @return object
+	 * @return mixed
 	 * @throws ClassNotFoundException
 	 * @throws InterfaceWithoutAliasException
 	 * @throws NotAnObjectException
