@@ -310,7 +310,7 @@ class ServiceManager implements ServiceInterface {
 			}
 
             // if the class is a not service
-            if (is_subclass_of($reflectionParameter->getType()->getName(),
+            if (!is_subclass_of($reflectionParameter->getType()->getName(),
                 ServiceInterface::class)) {
                 throw new NotAServiceException(
                     $reflectionParameter->getType()->getName(),
