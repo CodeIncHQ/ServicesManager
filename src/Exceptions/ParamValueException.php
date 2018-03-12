@@ -51,7 +51,7 @@ class ParamValueException extends InstantiatorException
         parent::__construct(
             sprintf(
                 "Error while preparing the value of the parameter %s (#%s) "
-                ."of the constructor of %s: %s",
+                ."of %s::__construct(): %s",
                 "\${$paramName}", $paramNumber, $className, $message
             ),
             $instantiator,

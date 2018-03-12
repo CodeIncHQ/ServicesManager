@@ -26,7 +26,6 @@ use CodeInc\Instantiator\Exceptions\NewInstanceException;
 use CodeInc\Instantiator\Exceptions\NotAnObjectException;
 use CodeInc\Instantiator\Exceptions\ParamValueException;
 use CodeInc\Instantiator\Exceptions\InstantiatorException;
-use CodeInc\Instantiator\Exceptions\ParamTypeException;
 use CodeInc\Instantiator\Exceptions\ClassNotFoundException;
 
 
@@ -224,100 +223,79 @@ class Instantiator
 	}
 
 	/**
-	 * @param \ReflectionClass $reflectionClass
+	 * @param \ReflectionClass $class
 	 * @return object
 	 * @throws NewInstanceException
 	 * @throws InstantiatorException
 	 */
-	private function instantiate(\ReflectionClass $reflectionClass)
+	private function instantiate(\ReflectionClass $class)
 	{
 		try {
-			return $reflectionClass->newInstanceArgs(
-			    $this->getCustructorParams($reflectionClass)
-            );
+            $args = [];
+            foreach ($class->getMethod("__construct")->getParameters() as $number => $param) {
+                $args[] = $this->getCustructorParamValue($param, $class, $number + 1);
+            }
+			return $class->newInstanceArgs($args);
 		}
 		catch (InstantiatorException $exception) {
 			throw $exception;
 		}
 		catch (\Throwable $exception) {
-            throw new NewInstanceException($reflectionClass->getName(), $this);
+            throw new NewInstanceException($class->getName(), $this);
 		}
 	}
 
-	/**
-	 * Returns the array of the constuctor parameters value for the given class.
-	 *
-	 * @param \ReflectionClass $reflectionClass
-	 * @return array
-	 * @throws ClassNotFoundException
-	 * @throws InterfaceWithoutAliasException
-	 * @throws NotAnObjectException
-	 * @throws InstantiatorException
-	 * @throws \ReflectionException
+    /**
+     * Returns the value of a constructor parameter.
+     *
+     * @param \ReflectionParameter $param
+     * @param \ReflectionClass $class
+     * @param int $number
+     * @return mixed
+     * @throws ClassNotFoundException
+     * @throws InstantiatorException
+     * @throws InterfaceWithoutAliasException
+     * @throws NotAnObjectException
      * @throws ParamValueException
-	 */
-	private function getCustructorParams(\ReflectionClass $reflectionClass):array
+     * @throws \ReflectionException
+     */
+	private function getCustructorParamValue(\ReflectionParameter $param,
+        \ReflectionClass $class, int $number)
 	{
-		$args = [];
-		foreach ($reflectionClass->getMethod("__construct")->getParameters()
-		         as $number => $reflectionParameter) {
-			try {
-				$args[] = $this->getCustructorParamValue($reflectionParameter);
-			}
-			catch (ParamTypeException $exception) {
+		// if the param is required
+		if (!$param->isOptional()) {
+
+			// if the param type is not set
+			if (!$param->hasType()) {
                 throw new ParamValueException(
-                    $reflectionClass->getName(),
-                    $reflectionParameter->getName(),
-                    $number + 1,
-                    $exception->getMessage(),
+                    $class->getName(),
+                    $param->getName(),
+                    $number,
+                    "the parameter does not have a type hint",
                     $this
                 );
 			}
-		}
-		return $args;
-	}
-
-	/**
-	 * Returns the value of a constructor parameter.
-	 *
-	 * @param \ReflectionParameter $reflectionParameter
-	 * @return mixed
-	 * @throws ClassNotFoundException
-	 * @throws InterfaceWithoutAliasException
-	 * @throws NotAnObjectException
-	 * @throws ParamTypeException
-	 * @throws InstantiatorException
-	 * @throws \ReflectionException
-	 */
-	private function getCustructorParamValue(\ReflectionParameter $reflectionParameter)
-	{
-		// if the param is required
-		if (!$reflectionParameter->isOptional()) {
-			// if the param type is not set
-			if (!$reflectionParameter->hasType()) {
-				throw new ParamTypeException(
-					sprintf("param does not have a type hint"),
-					$this
-				);
-			}
 
 			// if the param type is not a class
-			if ($reflectionParameter->getType()->isBuiltin()) {
-				throw new ParamTypeException(
-					sprintf("param type is not a class or an interface (type: %s)",
-						$reflectionParameter->getType()->getName()),
-					$this
-				);
+			if ($param->getType()->isBuiltin()) {
+                throw new ParamValueException(
+                    $class->getName(),
+                    $param->getName(),
+                    $number,
+                    sprintf("the parameter type is not a class or an interface (type: %s)",
+                        $param->getType()->getName()),
+                    $this
+                );
 			}
 
 			// instantiating the class
-			return $this->getInstance($reflectionParameter->getType()->getName());
+			return $this->getInstance($param->getType()->getName());
 		}
 
 		// optionnal param
 		else {
 			// if the param is optionnal returning it's default value
-			return $reflectionParameter->getDefaultValue();
+			return $param->getDefaultValue();
 		}
 	}
 }
