@@ -169,8 +169,8 @@ class ServiceManager implements ServiceInterface {
 		}
 
 		// if the class is an alias
-		if (isset($this->aliases[$serviceClass])) {
-			$serviceClass = $this->aliases[$serviceClass];
+		if ($alias = $this->getAlias($serviceClass)) {
+			$serviceClass = $alias;
 		}
 
 		// checks if the class exists
@@ -202,8 +202,8 @@ class ServiceManager implements ServiceInterface {
             return  true;
         }
 
-        if (isset($this->aliases[$serviceClass])) {
-            return isset($this->services[$this->aliases[$serviceClass]]);
+        if ($alias = $this->getAlias($serviceClass)) {
+            return $this->hasInstance($alias);
         }
 
         return false;
