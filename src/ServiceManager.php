@@ -42,7 +42,7 @@ class ServiceManager implements ServiceInterface {
 	/**
 	 * Instantiated objects stack.
 	 *
-	 * @see ServiceManager::addService()
+	 * @see ServiceManager::addInstance()
 	 * @see ServiceManager::getInstance()
 	 * @var object[]
 	 */
@@ -64,7 +64,7 @@ class ServiceManager implements ServiceInterface {
 	 */
 	public function __construct()
 	{
-		$this->addService($this);
+		$this->addInstance($this);
 	}
 
 	/**
@@ -77,7 +77,7 @@ class ServiceManager implements ServiceInterface {
 	 * @throws NotAnObjectException
 	 * @throws \ReflectionException
 	 */
-	public function addService($service):void
+	public function addInstance($service):void
 	{
 		// checks the serivce
 		if (!is_object($service)) {
@@ -166,7 +166,7 @@ class ServiceManager implements ServiceInterface {
 
 		// if the class was never added or instantiated, we instantiate it
 		$service = $this->newInstance($reflectionClass);
-		$this->addService($service);
+		$this->addInstance($service);
 		return $service;
 	}
 

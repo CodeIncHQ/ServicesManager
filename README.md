@@ -41,7 +41,7 @@ $mySecondService->helloWorld();
 
 // you also can add external objects to makes them available to the servides,
 // for instance a PSR-7 ServerRequest object or Doctrine's EntityManager.
-$serviceManager->addService($entityManager);
+$serviceManager->addInstance($entityManager);
 
 // the service manager will pass the instance of the service manager added
 // using addService()
