@@ -222,24 +222,23 @@ class Instantiator
     }
 
     /**
-     * Returns a new instance of a class.
-     *
-     * @param string $class
+     * @param \ReflectionClass $class
      * @return object
      * @throws NewInstanceException
+     * @throws InstantiatorException
      */
     private function instantiate(string $class)
     {
         try {
-            $class = new \ReflectionClass($class);
+            $reflectionClass = new \ReflectionClass($class);
             $args = [];
-            foreach ($class->getMethod("__construct")->getParameters() as $number => $param) {
-                $args[] = $this->getCustructorParamValue($param, $class, $number + 1);
+            foreach ($reflectionClass->getMethod("__construct")->getParameters() as $number => $param) {
+                $args[] = $this->getCustructorParamValue($param, $reflectionClass, $number + 1);
             }
-            return $class->newInstanceArgs($args);
+            return $reflectionClass->newInstanceArgs($args);
         }
         catch (\Throwable $exception) {
-            throw new NewInstanceException($class->getName(),
+            throw new NewInstanceException($class,
                 $this, null, $exception);
         }
     }
