@@ -1,6 +1,6 @@
 {
   "name": "codeinc/lib-instantiator",
-  "version": "1.0.0-dev",
+  "version": "1.0.0",
   "description": "PHP objects instantiator",
   "homepage": "https://github.com/CodeIncHQ/lib-instantiator",
   "type": "library",
