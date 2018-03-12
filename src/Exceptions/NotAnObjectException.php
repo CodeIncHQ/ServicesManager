@@ -17,7 +17,7 @@
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
 // Time:     17:00
-// Project:  lib-servicemanager
+// Project:  lib-instantiator
 //
 declare(strict_types = 1);
 namespace CodeInc\Instantiator\Exceptions;

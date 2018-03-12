@@ -17,7 +17,7 @@
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
 // Time:     18:05
-// Project:  lib-servicemanager
+// Project:  lib-instantiator
 //
 declare(strict_types = 1);
 namespace CodeInc\Instantiator\Exceptions;
@@ -40,12 +40,12 @@ class ParamValueException extends InstantiatorException
      * @param string $paramName
      * @param int $paramNumber
      * @param string $message
-     * @param Instantiator $serviceManager
+     * @param Instantiator $instantiator
      * @param int|null $code
      * @param null|Throwable $previous
      */
     public function __construct(string $className, string $paramName,
-        int $paramNumber, string $message, Instantiator $serviceManager,
+        int $paramNumber, string $message, Instantiator $instantiator,
         ?int $code = null, ?Throwable $previous = null)
     {
         parent::__construct(
@@ -54,7 +54,7 @@ class ParamValueException extends InstantiatorException
                 ."of the constructor of %s: %s",
                 "\${$paramName}", $paramNumber, $className, $message
             ),
-            $serviceManager,
+            $instantiator,
             $code,
             $previous
         );
