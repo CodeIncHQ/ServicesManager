@@ -169,6 +169,25 @@ class ServiceManager implements ServiceInterface {
 		return $service;
 	}
 
+    /**
+     * Verifies the manager has an instance of a service.
+     *
+     * @param string $serviceClass
+     * @return bool
+     */
+	public function hasInstance(string $serviceClass):bool
+    {
+        if (isset($this->services[$serviceClass])) {
+            return  true;
+        }
+
+        if (isset($this->aliases[$serviceClass])) {
+            return isset($this->services[$this->aliases[$serviceClass]]);
+        }
+
+        return false;
+    }
+
 	/**
 	 * Alias of getService()
 	 *
