@@ -130,14 +130,16 @@ class Instantiator
      * Verifies if an alias exist for a class / interface.
      *
      * @param string $class
-     * @return null|string
+     * @return bool
      */
-	public function hasAlias(string $class):?string
+	public function hasAlias(string $class):bool
     {
-        return $this->aliases[$class] ?? null;
+        return isset($this->aliases[$class]);
     }
 
 	/**
+     * Returns an alias target or null if not set.
+     *
 	 * @param string $class
 	 * @return null|string
 	 */
@@ -183,7 +185,7 @@ class Instantiator
 		}
 
 		// if the class was never added or instantiated, we instantiate it
-		$instance = $this->newInstance($reflectionClass);
+		$instance = $this->instantiate($reflectionClass);
 		$this->addInstance($instance);
 		return $instance;
 	}
@@ -227,7 +229,7 @@ class Instantiator
 	 * @throws NewInstanceException
 	 * @throws InstantiatorException
 	 */
-	private function newInstance(\ReflectionClass $reflectionClass)
+	private function instantiate(\ReflectionClass $reflectionClass)
 	{
 		try {
 			return $reflectionClass->newInstanceArgs(
