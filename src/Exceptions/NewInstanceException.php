@@ -20,8 +20,8 @@
 // Project:  lib-servicemanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager\Exceptions;
-use CodeInc\ServiceManager\ServiceManager;
+namespace CodeInc\Instantiator\Exceptions;
+use CodeInc\Instantiator\Instantiator;
 use Throwable;
 
 
@@ -31,22 +31,22 @@ use Throwable;
  * @package CodeInc\ServiceManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class NewInstanceException extends ServiceManagerException
+class NewInstanceException extends InstantiatorException
 {
     /**
      * NewInstanceException constructor.
      *
      * @param string $class
-     * @param ServiceManager $serviceManager
+     * @param Instantiator $instantiator
      * @param int|null $code
      * @param null|Throwable $previous
      */
-    public function __construct(string $class, ServiceManager $serviceManager,
+    public function __construct(string $class, Instantiator $instantiator,
         ?int $code = null, ?Throwable $previous = null)
     {
         parent::__construct(
             sprintf("Error while instantiating the class %s", $class),
-            $serviceManager,
+            $instantiator,
             $code,
             $previous
         );

@@ -20,8 +20,8 @@
 // Project:  lib-servicemanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager\Exceptions;
-use CodeInc\ServiceManager\ServiceManager;
+namespace CodeInc\Instantiator\Exceptions;
+use CodeInc\Instantiator\Instantiator;
 use Throwable;
 
 
@@ -31,26 +31,26 @@ use Throwable;
  * @package CodeInc\ServiceManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class InterfaceWithoutAliasException extends ServiceManagerException {
+class InterfaceWithoutAliasException extends InstantiatorException {
 	/**
 	 * InterfaceWithoutAliasException constructor.
 	 *
 	 * @param string $interface
-	 * @param ServiceManager $serviceManager
+	 * @param Instantiator $instantiator
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $interface, ServiceManager $serviceManager,
+	public function __construct(string $interface, Instantiator $instantiator,
 		?int $code = null, ?Throwable $previous = null)
 	{
 		parent::__construct(
-			sprintf("Unable to return a service for the interface (%s), no alias found. "
+			sprintf("Unable to return an instance for the interface (%s), no alias found. "
 				."Use %s to map interfaces to classes or use %s to add a service implementing the "
 				."requested interface.",
 				$interface,
-				get_class($serviceManager)."::addAlias()",
-				get_class($serviceManager)."::addService()"),
-			$serviceManager,
+				get_class($instantiator)."::addAlias()",
+				get_class($instantiator)."::addInstance()"),
+			$instantiator,
 			$code,
 			$previous
 		);

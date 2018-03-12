@@ -1,8 +1,8 @@
 {
-  "name": "codeinc/lib-servicemanager",
+  "name": "codeinc/lib-instantiator",
   "version": "1.0.0-dev",
-  "description": "Service manager",
-  "homepage": "https://github.com/CodeIncHQ/lib-servicemanager",
+  "description": "PHP objects instantiator",
+  "homepage": "https://github.com/CodeIncHQ/lib-instantiator",
   "type": "library",
   "license": "MIT",
   "require": {
@@ -12,10 +12,10 @@
     "phpunit/phpunit": "^7"
   },
   "autoload": {
-    "psr-4": {"CodeInc\\ServiceManager\\": "src/"}
+    "psr-4": {"CodeInc\\Instantiator\\": "src/"}
   },
   "autoload-dev": {
-    "psr-4": { "CodeInc\\ServiceManager\\Tests\\": "tests/" }
+    "psr-4": { "CodeInc\\Instantiator\\Tests\\": "tests/" }
   },
   "authors": [
     {

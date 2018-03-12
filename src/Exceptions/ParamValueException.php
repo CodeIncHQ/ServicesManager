@@ -20,8 +20,8 @@
 // Project:  lib-servicemanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager\Exceptions;
-use CodeInc\ServiceManager\ServiceManager;
+namespace CodeInc\Instantiator\Exceptions;
+use CodeInc\Instantiator\Instantiator;
 use Throwable;
 
 
@@ -31,27 +31,28 @@ use Throwable;
  * @package CodeInc\ServiceManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class ParamValueException extends ServiceManagerException
+class ParamValueException extends InstantiatorException
 {
     /**
      * ParamValueException constructor.
      *
+     * @param string $className
      * @param string $paramName
      * @param int $paramNumber
      * @param string $message
-     * @param ServiceManager $serviceManager
+     * @param Instantiator $serviceManager
      * @param int|null $code
      * @param null|Throwable $previous
      */
-    public function __construct(string $paramName, int $paramNumber,
-        string $message, ServiceManager $serviceManager, ?int $code = null,
-        ?Throwable $previous = null)
+    public function __construct(string $className, string $paramName,
+        int $paramNumber, string $message, Instantiator $serviceManager,
+        ?int $code = null, ?Throwable $previous = null)
     {
         parent::__construct(
             sprintf(
                 "Error while preparing the value of the parameter %s (#%s) "
-                ."of the constructor: %s",
-                "\${$paramName}", $paramNumber, $message
+                ."of the constructor of %s: %s",
+                "\${$paramName}", $paramNumber, $className, $message
             ),
             $serviceManager,
             $code,

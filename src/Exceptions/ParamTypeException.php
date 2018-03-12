@@ -20,7 +20,7 @@
 // Project:  intranet
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager\Exceptions;
+namespace CodeInc\Instantiator\Exceptions;
 
 
 /**
@@ -29,6 +29,6 @@ namespace CodeInc\ServiceManager\Exceptions;
  * @package Tests\Instantiator
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class ParamTypeException extends ServiceManagerException {
+class ParamTypeException extends InstantiatorException {
 
 }

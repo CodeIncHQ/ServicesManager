@@ -20,15 +20,14 @@
 // Project:  intranet
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager;
-use CodeInc\ServiceManager\Exceptions\InterfaceWithoutAliasException;
-use CodeInc\ServiceManager\Exceptions\NewInstanceException;
-use CodeInc\ServiceManager\Exceptions\NotAnObjectException;
-use CodeInc\ServiceManager\Exceptions\NotAServiceException;
-use CodeInc\ServiceManager\Exceptions\ParamValueException;
-use CodeInc\ServiceManager\Exceptions\ServiceManagerException;
-use CodeInc\ServiceManager\Exceptions\ParamTypeException;
-use CodeInc\ServiceManager\Exceptions\ClassNotFoundException;
+namespace CodeInc\Instantiator;
+use CodeInc\Instantiator\Exceptions\InterfaceWithoutAliasException;
+use CodeInc\Instantiator\Exceptions\NewInstanceException;
+use CodeInc\Instantiator\Exceptions\NotAnObjectException;
+use CodeInc\Instantiator\Exceptions\ParamValueException;
+use CodeInc\Instantiator\Exceptions\InstantiatorException;
+use CodeInc\Instantiator\Exceptions\ParamTypeException;
+use CodeInc\Instantiator\Exceptions\ClassNotFoundException;
 
 
 /**
@@ -38,20 +37,20 @@ use CodeInc\ServiceManager\Exceptions\ClassNotFoundException;
  * @author Joan Fabrégat <joan@codeinc.fr>
  * @todo add object type hint when min compatibility >= 7.2
  */
-class ServiceManager implements ServiceInterface {
+class Instantiator {
 	/**
 	 * Instantiated objects stack.
 	 *
-	 * @see ServiceManager::addInstance()
-	 * @see ServiceManager::getInstance()
+	 * @see Instantiator::addInstance()
+	 * @see Instantiator::getInstance()
 	 * @var object[]
 	 */
-	private $services = [];
+	private $instances = [];
 
 	/**
 	 * Services aliases (other classes or interfaces)
 	 *
-	 * @see ServiceManager::addAlias()
+	 * @see Instantiator::addAlias()
 	 * @var string[]
 	 */
 	private $aliases = [];
@@ -59,7 +58,7 @@ class ServiceManager implements ServiceInterface {
 	/**
 	 * ServiceManager constructor.
 	 *
-	 * @throws ServiceManagerException
+	 * @throws InstantiatorException
 	 * @throws \ReflectionException
 	 */
 	public function __construct()
@@ -68,27 +67,26 @@ class ServiceManager implements ServiceInterface {
 	}
 
 	/**
-	 * Adds an instantiated service. This can be usefull when you need to make
-     * available services which requires a specific configuration. It also allows
-     * to make available objects which are not technically services like the
+	 * Adds an instance of an object. This can be usefull when you need to make
+     * available instances which requires a specific configuration like the
      * ServerRequest object or Doctrine's EntityManager.
 	 *
-	 * @param ServiceInterface|object $service
+	 * @param object $instance
 	 * @throws NotAnObjectException
 	 * @throws \ReflectionException
 	 */
-	public function addInstance($service):void
+	public function addInstance($instance):void
 	{
 		// checks the serivce
-		if (!is_object($service)) {
-			throw new NotAnObjectException(gettype($service), $this);
+		if (!is_object($instance)) {
+			throw new NotAnObjectException(gettype($instance), $this);
 		}
 
-		// adds the service
-		$reflectionClass = new \ReflectionClass($service);
-		$this->services[$reflectionClass->getName()] = $service;
+		// adds the instance
+		$reflectionClass = new \ReflectionClass($instance);
+		$this->instances[$reflectionClass->getName()] = $instance;
 
-		// maps the service interfaces
+		// maps the instance interfaces
 		foreach ($reflectionClass->getInterfaces() as $interface) {
 			$this->addAlias(
 			    $reflectionClass->getName(),
@@ -97,7 +95,7 @@ class ServiceManager implements ServiceInterface {
             );
 		}
 
-		// maps the service parent classes
+		// maps the instance parent classes
 		$parent = $reflectionClass;
 		while ($parent = $parent->getParentClass()) {
 			$this->addAlias(
@@ -113,16 +111,16 @@ class ServiceManager implements ServiceInterface {
      * service manager to use a specific class when it encounters an interface
      * as a type hint.
 	 *
-	 * @param string $serviceClass
+	 * @param string $class Class or interface name
 	 * @param string $alias
 	 * @param bool $replace
 	 * @return bool
 	 */
-	public function addAlias(string $serviceClass, string $alias,
+	public function addAlias(string $class, string $alias,
         bool $replace = true):bool
 	{
 		if ($replace === true || !isset($this->aliases[$alias])) {
-			$this->aliases[$alias] = $serviceClass;
+			$this->aliases[$alias] = $class;
 		}
 		return false;
 	}
@@ -148,61 +146,60 @@ class ServiceManager implements ServiceInterface {
 	}
 
 	/**
-	 * Returns a service instance. If the service was used previously, returns
-     * the previous instance. If the service was added using addService(),
-     * returns the added instance. If the service was never called, instantiate
-     * the service and all of its requirements.
+	 * Returns an instance. If the instance was used previously, returns
+     * the previous one. If the instance was added using addInstance(),
+     * returns the added instance.
 	 *
-	 * @param string $serviceClass
+	 * @param string $class
 	 * @return object
 	 * @throws ClassNotFoundException
 	 * @throws InterfaceWithoutAliasException
 	 * @throws NotAnObjectException
-	 * @throws ServiceManagerException
+	 * @throws InstantiatorException
 	 * @throws \ReflectionException
 	 */
-	public function getInstance(string $serviceClass)
+	public function getInstance(string $class)
 	{
 		// if there is an instance already available to the given class
-		if (isset($this->services[$serviceClass])) {
-			return $this->services[$serviceClass];
+		if (isset($this->instances[$class])) {
+			return $this->instances[$class];
 		}
 
 		// if the class is an alias
-		if ($alias = $this->getAlias($serviceClass)) {
-			$serviceClass = $alias;
+		if ($alias = $this->getAlias($class)) {
+			$class = $alias;
 		}
 
 		// checks if the class exists
-		if (!class_exists($serviceClass)) {
-			throw new ClassNotFoundException($serviceClass, $this);
+		if (!class_exists($class)) {
+			throw new ClassNotFoundException($class, $this);
 		}
 
-		// checks if the service is an interface
-		$reflectionClass = new \ReflectionClass($serviceClass);
+		// checks if the class is an interface
+		$reflectionClass = new \ReflectionClass($class);
 		if ($reflectionClass->isInterface()) {
-			throw new InterfaceWithoutAliasException($serviceClass, $this);
+			throw new InterfaceWithoutAliasException($class, $this);
 		}
 
 		// if the class was never added or instantiated, we instantiate it
-		$service = $this->newInstance($reflectionClass);
-		$this->addInstance($service);
-		return $service;
+		$instance = $this->newInstance($reflectionClass);
+		$this->addInstance($instance);
+		return $instance;
 	}
 
     /**
-     * Verifies the manager has an instance of a service.
+     * Verifies the manager has an instance of an object.
      *
-     * @param string $serviceClass
+     * @param string $class
      * @return bool
      */
-	public function hasInstance(string $serviceClass):bool
+	public function hasInstance(string $class):bool
     {
-        if (isset($this->services[$serviceClass])) {
+        if (isset($this->instances[$class])) {
             return  true;
         }
 
-        if ($alias = $this->getAlias($serviceClass)) {
+        if ($alias = $this->getAlias($class)) {
             return $this->hasInstance($alias);
         }
 
@@ -210,24 +207,24 @@ class ServiceManager implements ServiceInterface {
     }
 
 	/**
-	 * Alias of getService()
+	 * Alias of getInstance()
 	 *
-	 * @uses ServiceManager::getInstance()
-	 * @param string $serviceClass
+	 * @uses Instantiator::getInstance()
+	 * @param string $class
 	 * @return object
-	 * @throws ServiceManagerException
+	 * @throws InstantiatorException
 	 * @throws \ReflectionException
 	 */
-	public function __invoke(string $serviceClass)
+	public function __invoke(string $class)
 	{
-		return $this->getInstance($serviceClass);
+		return $this->getInstance($class);
 	}
 
 	/**
 	 * @param \ReflectionClass $reflectionClass
 	 * @return object
 	 * @throws NewInstanceException
-	 * @throws ServiceManagerException
+	 * @throws InstantiatorException
 	 */
 	private function newInstance(\ReflectionClass $reflectionClass)
 	{
@@ -236,7 +233,7 @@ class ServiceManager implements ServiceInterface {
 			    $this->getCustructorParams($reflectionClass)
             );
 		}
-		catch (ServiceManagerException $exception) {
+		catch (InstantiatorException $exception) {
 			throw $exception;
 		}
 		catch (\Throwable $exception) {
@@ -252,7 +249,7 @@ class ServiceManager implements ServiceInterface {
 	 * @throws ClassNotFoundException
 	 * @throws InterfaceWithoutAliasException
 	 * @throws NotAnObjectException
-	 * @throws ServiceManagerException
+	 * @throws InstantiatorException
 	 * @throws \ReflectionException
      * @throws ParamValueException
 	 */
@@ -266,6 +263,7 @@ class ServiceManager implements ServiceInterface {
 			}
 			catch (ParamTypeException $exception) {
                 throw new ParamValueException(
+                    $reflectionClass->getName(),
                     $reflectionParameter->getName(),
                     $number + 1,
                     $exception->getMessage(),
@@ -285,7 +283,7 @@ class ServiceManager implements ServiceInterface {
 	 * @throws InterfaceWithoutAliasException
 	 * @throws NotAnObjectException
 	 * @throws ParamTypeException
-	 * @throws ServiceManagerException
+	 * @throws InstantiatorException
 	 * @throws \ReflectionException
 	 */
 	private function getCustructorParamValue(\ReflectionParameter $reflectionParameter)
@@ -308,15 +306,6 @@ class ServiceManager implements ServiceInterface {
 					$this
 				);
 			}
-
-            // if the class is a not service
-            if (!is_subclass_of($reflectionParameter->getType()->getName(),
-                ServiceInterface::class)) {
-                throw new NotAServiceException(
-                    $reflectionParameter->getType()->getName(),
-                    $this
-                );
-            }
 
 			// instantiating the class
 			return $this->getInstance($reflectionParameter->getType()->getName());

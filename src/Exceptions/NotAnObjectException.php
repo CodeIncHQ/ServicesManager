@@ -20,8 +20,8 @@
 // Project:  lib-servicemanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager\Exceptions;
-use CodeInc\ServiceManager\ServiceManager;
+namespace CodeInc\Instantiator\Exceptions;
+use CodeInc\Instantiator\Instantiator;
 use Throwable;
 
 
@@ -31,21 +31,21 @@ use Throwable;
  * @package CodeInc\ServiceManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class NotAnObjectException extends ServiceManagerException {
+class NotAnObjectException extends InstantiatorException {
 	/**
 	 * NotAnObjectException constructor.
 	 *
 	 * @param string $varType
-	 * @param ServiceManager $serviceManager
+	 * @param Instantiator $instantiator
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $varType, ServiceManager $serviceManager,
+	public function __construct(string $varType, Instantiator $instantiator,
 		?int $code = null, ?Throwable $previous = null)
 	{
 		parent::__construct(
 			sprintf("You can only add instantiated services (%s given)", $varType),
-			$serviceManager,
+			$instantiator,
 			$code,
 			$previous
 		);

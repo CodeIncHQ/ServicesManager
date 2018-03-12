@@ -20,8 +20,8 @@
 // Project:  lib-servicemanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager\Exceptions;
-use CodeInc\ServiceManager\ServiceManager;
+namespace CodeInc\Instantiator\Exceptions;
+use CodeInc\Instantiator\Instantiator;
 use Throwable;
 
 
@@ -31,21 +31,21 @@ use Throwable;
  * @package CodeInc\ServiceManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class ClassNotFoundException extends ServiceManagerException {
+class ClassNotFoundException extends InstantiatorException {
 	/**
 	 * ServiceNotFoundException constructor.
 	 *
 	 * @param string $serviceClass
-	 * @param ServiceManager $serviceManager
+	 * @param Instantiator $instantiator
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $serviceClass, ServiceManager $serviceManager,
+	public function __construct(string $serviceClass, Instantiator $instantiator,
 		?int $code = null, ?Throwable $previous = null)
 	{
 		parent::__construct(
 			sprintf("The class %s does not exist", $serviceClass),
-			$serviceManager,
+			$instantiator,
 			$code,
 			$previous
 		);
