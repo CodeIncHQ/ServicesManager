@@ -22,10 +22,8 @@
 declare(strict_types = 1);
 namespace CodeInc\ServiceManager;
 use CodeInc\ServiceManager\Exceptions\InterfaceWithoutAliasException;
-use CodeInc\ServiceManager\Exceptions\NewInstanceException;
 use CodeInc\ServiceManager\Exceptions\NotAnObjectException;
 use CodeInc\ServiceManager\Exceptions\NotAServiceException;
-use CodeInc\ServiceManager\Exceptions\ParamValueException;
 use CodeInc\ServiceManager\Exceptions\ServiceManagerException;
 use CodeInc\ServiceManager\Exceptions\ClassNotFoundException;
 

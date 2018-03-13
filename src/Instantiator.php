@@ -42,11 +42,6 @@ class Instantiator
     private $serviceManager;
 
     /**
-     * @var \ReflectionClass
-     */
-    private $class;
-
-    /**
      * @var array
      */
     private $dependencies;
@@ -55,22 +50,21 @@ class Instantiator
      * Instantiator constructor.
      *
      * @param ServiceManager $serviceManager
-     * @param string $class
      * @param array $dependencies
-     * @throws ClassNotFoundException
-     * @throws \ReflectionException
      */
-    public function __construct(ServiceManager $serviceManager, string $class,
+    public function __construct(ServiceManager $serviceManager,
         array $dependencies = [])
     {
-        // checks if the class exists
-        if (!class_exists($class)) {
-            throw new ClassNotFoundException($class, $serviceManager);
-        }
-
         $this->serviceManager = $serviceManager;
-        $this->class = new \ReflectionClass($class);
         $this->dependencies = $dependencies;
+    }
+
+    /**
+     * @return ServiceManager
+     */
+    public function getServiceManager():ServiceManager
+    {
+        return $this->serviceManager;
     }
 
     /**
@@ -88,42 +82,55 @@ class Instantiator
     }
 
     /**
-     * @return ServiceManager
+     * Returns the dependencies array.
+     *
+     * @return object[]
      */
-    public function getServiceManager():ServiceManager
+    public function getDependencies():array
     {
-        return $this->serviceManager;
+        return $this->dependencies;
     }
 
     /**
-     * @return \ReflectionClass
+     * Removes a dependency
+     *
+     * @param string $dependencyClass
      */
-    public function getClass():\ReflectionClass
+    public function removeDependency(string $dependencyClass):void
     {
-        return $this->class;
+        unset($this->dependencies[$dependencyClass]);
     }
 
     /**
      * Instantiate the class an returns the new instance.
      *
+     * @param string $class
      * @return object
      * @throws NewInstanceException
+     * @throws ClassNotFoundException
      */
-    public function instantiate()
+    public function instantiate(string $class)
     {
+        // checks if the class exists
+        if (!class_exists($class)) {
+            throw new ClassNotFoundException($class, $this->serviceManager);
+        }
+
+        // instantiate the class
         try {
-            if ($this->class->hasMethod("__construct")) {
+            $class = new \ReflectionClass($class);
+            if ($class->hasMethod("__construct")) {
                 $args = [];
-                foreach ($this->class->getMethod("__construct")->getParameters() as $number => $param) {
-                    $args[] = $this->getCustructorParamValue($param,$number + 1);
+                foreach ($class->getMethod("__construct")->getParameters() as $number => $param) {
+                    $args[] = $this->getCustructorParamValue($param, $class, $number + 1);
                 }
-                return $this->class->newInstanceArgs($args);
+                return $class->newInstanceArgs($args);
             }
-            return $this->class->newInstance();
+            return $class->newInstance();
         }
         catch (\Throwable $exception) {
             throw new NewInstanceException(
-                $this->class->getName(),
+                $class->getName(),
                 $this->serviceManager,
                 null, $exception
             );
@@ -134,6 +141,7 @@ class Instantiator
      * Returns the value of a constructor parameter.
      *
      * @param \ReflectionParameter $param
+     * @param \ReflectionClass $class
      * @param int $number
      * @return mixed
      * @throws Exceptions\ClassNotFoundException
@@ -143,7 +151,8 @@ class Instantiator
      * @throws ParamValueException
      * @throws \ReflectionException
      */
-    private function getCustructorParamValue(\ReflectionParameter $param, int $number)
+    private function getCustructorParamValue(\ReflectionParameter $param,
+        \ReflectionClass $class, int $number)
     {
         // if the param is required
         if (!$param->isOptional()) {
@@ -151,7 +160,7 @@ class Instantiator
             // if the param type is not set
             if (!$param->hasType()) {
                 throw new ParamValueException(
-                    $this->class->getName(),
+                    $class->getName(),
                     $param->getName(),
                     $number,
                     "the parameter does not have a type hint",
@@ -163,7 +172,7 @@ class Instantiator
             $paramClass = $param->getType()->getName();
             if ($param->getType()->isBuiltin()) {
                 throw new ParamValueException(
-                    $this->class->getName(),
+                    $class->getName(),
                     $param->getName(),
                     $number,
                     sprintf("the parameter type is not a class or an interface (type: %s)",
