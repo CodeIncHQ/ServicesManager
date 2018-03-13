@@ -1,4 +1,4 @@
-# PHP services manager
+# Services manager
 
 The library is intended to be used as a services manager. It is written in PHP 7.1.
 
@@ -6,8 +6,8 @@ The library is intended to be used as a services manager. It is written in PHP 7
 
 ```php
 <?php
-use CodeInc\ServiceManager\ServiceManager;
-use CodeInc\ServiceManager\ServiceInterface;
+use CodeInc\ServicesManager\ServicesManager;
+use CodeInc\ServicesManager\ServiceInterface;
 
 // a first service
 class MyFirstService implements ServiceInterface 
@@ -37,7 +37,7 @@ class MySecondService implements ServiceInterface
 
 // calling the second service, the service manager is going to first instantiated MyFirstService
 // then instantiate MySecondService with MyFirstService as a parameter.
-$serviceManager = new ServiceManager();
+$serviceManager = new ServicesManager();
 $mySecondService = $serviceManager->getService(MySecondService::class);
 $mySecondService->helloWorld();
 
@@ -55,10 +55,10 @@ class MyThirdService {
 
 
 ## Installation
-This library is available through [Packagist](https://packagist.org/packages/codeinc/lib-servicemanager) and can be installed using [Composer](https://getcomposer.org/): 
+This library is available through [Packagist](https://packagist.org/packages/codeinc/servicesmanager) and can be installed using [Composer](https://getcomposer.org/): 
 
 ```bash
-composer require codeinc/lib-servicemanager
+composer require codeinc/servicesmanager
 ```
 
 ## License

@@ -15,40 +15,21 @@
 // +---------------------------------------------------------------------+
 //
 // Author:   Joan Fabrégat <joan@codeinc.fr>
-// Date:     12/03/2018
-// Time:     18:03
-// Project:  lib-servicesmanager
+// Date:     13/03/2018
+// Time:     10:22
+// Project:  ServicesManager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServicesManager\Exceptions;
-use CodeInc\ServicesManager\ServicesManager;
-use Throwable;
+namespace CodeInc\ServicesManager;
 
 
 /**
- * Class NewInstanceException
+ * Interface ServiceInterface
  *
- * @package CodeInc\ServicesManager\Exceptions
+ * @package CodeInc\ServicesManager
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class NewInstanceException extends ServicesManagerException
+interface ServiceInterface
 {
-    /**
-     * NewInstanceException constructor.
-     *
-     * @param string $class
-     * @param ServicesManager $servicesManager
-     * @param int|null $code
-     * @param null|Throwable $previous
-     */
-    public function __construct(string $class, ServicesManager $servicesManager,
-        ?int $code = null, ?Throwable $previous = null)
-    {
-        parent::__construct(
-            sprintf("Error while instantiating the class %s", $class),
-            $servicesManager,
-            $code,
-            $previous
-        );
-    }
+
 }
