@@ -1,6 +1,6 @@
 {
   "name": "codeinc/services-manager",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "PHP service manager",
   "homepage": "https://github.com/CodeIncHQ/ServicesManager",
   "type": "library",
@@ -12,10 +12,10 @@
     "phpunit/phpunit": "^7"
   },
   "autoload": {
-    "psr-4": {"CodeInc\\ServiceManager\\": "src/"}
+    "psr-4": {"CodeInc\\ServicesManager\\": "src/"}
   },
   "autoload-dev": {
-    "psr-4": { "CodeInc\\ServiceManager\\Tests\\": "tests/" }
+    "psr-4": { "CodeInc\\ServicesManager\\Tests\\": "tests/" }
   },
   "authors": [
     {
