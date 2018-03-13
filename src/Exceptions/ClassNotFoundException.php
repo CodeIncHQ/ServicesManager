@@ -36,16 +36,16 @@ class ClassNotFoundException extends ServiceManagerException {
 	 * ServiceNotFoundException constructor.
 	 *
 	 * @param string $serviceClass
-	 * @param ServiceManager $instantiator
+	 * @param ServiceManager $serviceManager
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $serviceClass, ServiceManager $instantiator,
+	public function __construct(string $serviceClass, ServiceManager $serviceManager,
 		?int $code = null, ?Throwable $previous = null)
 	{
 		parent::__construct(
 			sprintf("The class %s does not exist", $serviceClass),
-			$instantiator,
+			$serviceManager,
 			$code,
 			$previous
 		);

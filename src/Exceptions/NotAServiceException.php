@@ -38,16 +38,16 @@ class NotAServiceException extends ServiceManagerException
      * NotAServiceException constructor.
      *
      * @param string $class
-     * @param ServiceManager $instantiator
+     * @param ServiceManager $serviceManager
      * @param int|null $code
      * @param null|Throwable $previous
      */
-    public function __construct(string $class, ServiceManager $instantiator,
+    public function __construct(string $class, ServiceManager $serviceManager,
         ?int $code = null, ?Throwable $previous = null)
     {
         parent::__construct(
             sprintf("The class %s is not a servce. All services must implement %s.",
                 $class, ServiceInterface::class),
-            $instantiator, $code, $previous);
+            $serviceManager, $code, $previous);
     }
 }

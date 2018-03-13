@@ -37,16 +37,16 @@ class NewInstanceException extends ServiceManagerException
      * NewInstanceException constructor.
      *
      * @param string $class
-     * @param ServiceManager $instantiator
+     * @param ServiceManager $serviceManager
      * @param int|null $code
      * @param null|Throwable $previous
      */
-    public function __construct(string $class, ServiceManager $instantiator,
+    public function __construct(string $class, ServiceManager $serviceManager,
         ?int $code = null, ?Throwable $previous = null)
     {
         parent::__construct(
             sprintf("Error while instantiating the class %s", $class),
-            $instantiator,
+            $serviceManager,
             $code,
             $previous
         );

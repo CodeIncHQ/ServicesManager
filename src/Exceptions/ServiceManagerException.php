@@ -41,14 +41,14 @@ class ServiceManagerException extends \Exception {
 	 * InstantiatorException constructor.
 	 *
 	 * @param string $message
-	 * @param ServiceManager $instantiator
+	 * @param ServiceManager $serviceManager
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $message, ServiceManager $instantiator,
+	public function __construct(string $message, ServiceManager $serviceManager,
 		?int $code = null, ?Throwable $previous = null)
 	{
-		$this->instantiator = $instantiator;
+		$this->instantiator = $serviceManager;
 		parent::__construct($message, $code ?? 0, $previous);
 	}
 

@@ -36,11 +36,11 @@ class InterfaceWithoutAliasException extends ServiceManagerException {
 	 * InterfaceWithoutAliasException constructor.
 	 *
 	 * @param string $interface
-	 * @param ServiceManager $instantiator
+	 * @param ServiceManager $serviceManager
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $interface, ServiceManager $instantiator,
+	public function __construct(string $interface, ServiceManager $serviceManager,
 		?int $code = null, ?Throwable $previous = null)
 	{
 		parent::__construct(
@@ -48,9 +48,9 @@ class InterfaceWithoutAliasException extends ServiceManagerException {
 				."Use %s to map interfaces to classes or use %s to add a service implementing the "
 				."requested interface.",
 				$interface,
-				get_class($instantiator)."::addAlias()",
-				get_class($instantiator)."::addInstance()"),
-			$instantiator,
+				get_class($serviceManager)."::addAlias()",
+				get_class($serviceManager)."::addInstance()"),
+			$serviceManager,
 			$code,
 			$previous
 		);

@@ -36,16 +36,16 @@ class NotAnObjectException extends ServiceManagerException {
 	 * NotAnObjectException constructor.
 	 *
 	 * @param string $varType
-	 * @param ServiceManager $instantiator
+	 * @param ServiceManager $serviceManager
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $varType, ServiceManager $instantiator,
+	public function __construct(string $varType, ServiceManager $serviceManager,
 		?int $code = null, ?Throwable $previous = null)
 	{
 		parent::__construct(
-			sprintf("You can only add instantiated services (%s given)", $varType),
-			$instantiator,
+			sprintf("You can only add instantiated objects (%s given)", $varType),
+			$serviceManager,
 			$code,
 			$previous
 		);

@@ -189,9 +189,23 @@ class ServiceManager implements ServiceInterface
         }
 
         // if the class was never added or instantiated, we instantiate it
-        $instance = $this->instantiate($class);
+        $instance = $this->getInstantiator($class)->instantiate();
         $this->addService($instance);
         return $instance;
+    }
+
+    /**
+     * Alias of getInstance()
+     *
+     * @uses ServiceManager::getService()
+     * @param string $class
+     * @return object
+     * @throws ServiceManagerException
+     * @throws \ReflectionException
+     */
+    public function __invoke(string $class)
+    {
+        return $this->getService($class);
     }
 
     /**
@@ -214,94 +228,15 @@ class ServiceManager implements ServiceInterface
     }
 
     /**
-     * Alias of getInstance()
+     * Retourne l'instantiateur pour une class.
      *
-     * @uses ServiceManager::getService()
      * @param string $class
-     * @return object
-     * @throws ServiceManagerException
-     * @throws \ReflectionException
-     */
-    public function __invoke(string $class)
-    {
-        return $this->getService($class);
-    }
-
-    /**
-     * @param string $class
-     * @return object
-     * @throws NewInstanceException
-     */
-    private function instantiate(string $class)
-    {
-        try {
-            $reflectionClass = new \ReflectionClass($class);
-            if ($reflectionClass->hasMethod("__construct")) {
-                $args = [];
-                foreach ($reflectionClass->getMethod("__construct")->getParameters() as $number => $param) {
-                    $args[] = $this->getCustructorParamValue($param, $reflectionClass, $number + 1);
-                }
-                return $reflectionClass->newInstanceArgs($args);
-            }
-            return $reflectionClass->newInstance();
-        }
-        catch (\Throwable $exception) {
-            throw new NewInstanceException($class,
-                $this, null, $exception);
-        }
-    }
-
-    /**
-     * Returns the value of a constructor parameter.
-     *
-     * @param \ReflectionParameter $param
-     * @param \ReflectionClass $class
-     * @param int $number
-     * @return mixed
+     * @return Instantiator
      * @throws ClassNotFoundException
-     * @throws ServiceManagerException
-     * @throws InterfaceWithoutAliasException
-     * @throws NotAnObjectException
-     * @throws ParamValueException
      * @throws \ReflectionException
      */
-    private function getCustructorParamValue(\ReflectionParameter $param,
-        \ReflectionClass $class, int $number)
+    public function getInstantiator(string $class):Instantiator
     {
-        // if the param is required
-        if (!$param->isOptional()) {
-
-            // if the param type is not set
-            if (!$param->hasType()) {
-                throw new ParamValueException(
-                    $class->getName(),
-                    $param->getName(),
-                    $number,
-                    "the parameter does not have a type hint",
-                    $this
-                );
-            }
-
-            // if the param type is not a class
-            if ($param->getType()->isBuiltin()) {
-                throw new ParamValueException(
-                    $class->getName(),
-                    $param->getName(),
-                    $number,
-                    sprintf("the parameter type is not a class or an interface (type: %s)",
-                        $param->getType()->getName()),
-                    $this
-                );
-            }
-
-            // instantiating the class
-            return $this->getService($param->getType()->getName());
-        }
-
-        // optionnal param
-        else {
-            // if the param is optionnal returning it's default value
-            return $param->getDefaultValue();
-        }
+        return new Instantiator($this, $class);
     }
 }
