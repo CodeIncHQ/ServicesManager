@@ -87,21 +87,11 @@ class ServicesManager implements ServiceInterface
         $reflectionClass = new \ReflectionClass($instance);
         $this->services[$reflectionClass->getName()] = $instance;
 
-        // maps the instance interfaces
-        foreach ($reflectionClass->getInterfaces() as $interface) {
+        // maps the class aliases (instances and parents)
+        foreach ($this->getClassAliases($reflectionClass) as $alias) {
             $this->addAlias(
                 $reflectionClass->getName(),
-                $interface->getName(),
-                false
-            );
-        }
-
-        // maps the instance parent classes
-        $parent = $reflectionClass;
-        while ($parent = $parent->getParentClass()) {
-            $this->addAlias(
-                $reflectionClass->getName(),
-                $parent->getName(),
+                $alias->getName(),
                 false
             );
         }
@@ -250,7 +240,11 @@ class ServicesManager implements ServiceInterface
         if ($dependencies) {
             foreach ($dependencies as $key => $object) {
                 unset($dependencies[$key]);
-                $dependencies[get_class($object)] = $object;
+                $objectRefClass = new \ReflectionClass($object);
+                $dependencies[$objectRefClass->getName()] = $object;
+                foreach ($this->getClassAliases($objectRefClass) as $alias) {
+                    $dependencies[$alias->getName()] = $object;
+                }
             }
         }
 
@@ -283,17 +277,19 @@ class ServicesManager implements ServiceInterface
 
                         // if the parameter value is available among the local dependencies
                         if (isset($dependencies[$paramClass])) {
-                            return $dependencies[$paramClass];
+                            $args[] = $dependencies[$paramClass];
                         }
 
                         // else instantiating the class
-                        return $this->getService($paramClass);
+                        else {
+                            $args[] = $this->getService($paramClass);
+                        }
                     }
 
                     // optionnal param
                     else {
                         // if the param is optionnal returning it's default value
-                        return $param->getDefaultValue();
+                        $args[] = $param->getDefaultValue();
                     }
                 }
                 return $class->newInstanceArgs($args);
@@ -309,5 +305,28 @@ class ServicesManager implements ServiceInterface
                 null, $exception
             );
         }
+    }
+
+    /**
+     * Returns the aliases of a class (parents and interfaces).
+     *
+     * @param \ReflectionClass $class
+     * @return \ReflectionClass[]
+     */
+    private function getClassAliases(\ReflectionClass $class):array
+    {
+        $aliases = [];
+
+        foreach ($class->getInterfaces() as $interface) {
+            $aliases[$interface->getName()] = $interface;
+        }
+
+        // maps the instance parent classes
+        $parent = $class;
+        while ($parent = $parent->getParentClass()) {
+            $aliases[$parent->getName()] = $parent;
+        }
+
+        return $aliases;
     }
 }
