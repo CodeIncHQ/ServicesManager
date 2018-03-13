@@ -211,11 +211,15 @@ class ServiceManager implements ServiceInterface
     /**
      * Verifies the manager has an instance of an object.
      *
-     * @param string $class
+     * @param string|object $class
      * @return bool
      */
-    public function hasServiceInstance(string $class):bool
+    public function hasServiceInstance($class):bool
     {
+        if (is_object($class)) {
+            $class = get_class($class);
+        }
+
         if (isset($this->services[$class])) {
             return  true;
         }
