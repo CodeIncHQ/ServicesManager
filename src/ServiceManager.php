@@ -17,40 +17,41 @@
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
 // Time:     10:33
-// Project:  lib-instantiator
+// Project:  lib-servicemanager
 //
 declare(strict_types = 1);
-namespace CodeInc\Instantiator;
-use CodeInc\Instantiator\Exceptions\InterfaceWithoutAliasException;
-use CodeInc\Instantiator\Exceptions\NewInstanceException;
-use CodeInc\Instantiator\Exceptions\NotAnObjectException;
-use CodeInc\Instantiator\Exceptions\ParamValueException;
-use CodeInc\Instantiator\Exceptions\InstantiatorException;
-use CodeInc\Instantiator\Exceptions\ClassNotFoundException;
+namespace CodeInc\ServiceManager;
+use CodeInc\ServiceManager\Exceptions\InterfaceWithoutAliasException;
+use CodeInc\ServiceManager\Exceptions\NewInstanceException;
+use CodeInc\ServiceManager\Exceptions\NotAnObjectException;
+use CodeInc\ServiceManager\Exceptions\NotAServiceException;
+use CodeInc\ServiceManager\Exceptions\ParamValueException;
+use CodeInc\ServiceManager\Exceptions\ServiceManagerException;
+use CodeInc\ServiceManager\Exceptions\ClassNotFoundException;
 
 
 /**
- * Class Instantiator
+ * Class ServiceManager
  *
- * @package Instantiator
+ * @package CodeInc\ServiceManager
  * @author Joan Fabrégat <joan@codeinc.fr>
  * @todo add object type hint when min compatibility >= 7.2
  */
-class Instantiator
+class ServiceManager implements ServiceInterface
 {
     /**
      * Instantiated objects stack.
      *
-     * @see Instantiator::addInstance()
-     * @see Instantiator::getInstance()
+     * @see ServiceManager::addService()
+     * @see ServiceManager::getService()
      * @var object[]
      */
-    private $instances = [];
+    private $services = [];
 
     /**
      * Services aliases (other classes or interfaces)
      *
-     * @see Instantiator::addAlias()
+     * @see ServiceManager::addAlias()
      * @var string[]
      */
     private $aliases = [];
@@ -58,12 +59,12 @@ class Instantiator
     /**
      * ServiceManager constructor.
      *
-     * @throws InstantiatorException
+     * @throws ServiceManagerException
      * @throws \ReflectionException
      */
     public function __construct()
     {
-        $this->addInstance($this);
+        $this->addService($this);
     }
 
     /**
@@ -75,7 +76,7 @@ class Instantiator
      * @throws NotAnObjectException
      * @throws \ReflectionException
      */
-    public function addInstance($instance):void
+    public function addService($instance):void
     {
         // checks the serivce
         if (!is_object($instance)) {
@@ -84,7 +85,7 @@ class Instantiator
 
         // adds the instance
         $reflectionClass = new \ReflectionClass($instance);
-        $this->instances[$reflectionClass->getName()] = $instance;
+        $this->services[$reflectionClass->getName()] = $instance;
 
         // maps the instance interfaces
         foreach ($reflectionClass->getInterfaces() as $interface) {
@@ -157,10 +158,10 @@ class Instantiator
      * @throws ClassNotFoundException
      * @throws InterfaceWithoutAliasException
      * @throws NotAnObjectException
-     * @throws InstantiatorException
+     * @throws ServiceManagerException
      * @throws \ReflectionException
      */
-    public function getInstance(string $class)
+    public function getService(string $class)
     {
         // if the class is an alias
         if ($alias = $this->getAlias($class)) {
@@ -168,8 +169,8 @@ class Instantiator
         }
 
         // if there is an instance already available to the given class
-        if (isset($this->instances[$class])) {
-            return $this->instances[$class];
+        if (isset($this->services[$class])) {
+            return $this->services[$class];
         }
 
         // checks if the class is an interface
@@ -182,9 +183,14 @@ class Instantiator
             throw new ClassNotFoundException($class, $this);
         }
 
+        // checks if the class is a service
+        if (is_subclass_of($class, ServiceInterface::class)) {
+            throw new NotAServiceException($class, $this);
+        }
+
         // if the class was never added or instantiated, we instantiate it
         $instance = $this->instantiate($class);
-        $this->addInstance($instance);
+        $this->addService($instance);
         return $instance;
     }
 
@@ -194,14 +200,14 @@ class Instantiator
      * @param string $class
      * @return bool
      */
-    public function hasInstance(string $class):bool
+    public function hasServiceInstance(string $class):bool
     {
-        if (isset($this->instances[$class])) {
+        if (isset($this->services[$class])) {
             return  true;
         }
 
         if ($alias = $this->getAlias($class)) {
-            return $this->hasInstance($alias);
+            return $this->hasServiceInstance($alias);
         }
 
         return false;
@@ -210,22 +216,21 @@ class Instantiator
     /**
      * Alias of getInstance()
      *
-     * @uses Instantiator::getInstance()
+     * @uses ServiceManager::getService()
      * @param string $class
      * @return object
-     * @throws InstantiatorException
+     * @throws ServiceManagerException
      * @throws \ReflectionException
      */
     public function __invoke(string $class)
     {
-        return $this->getInstance($class);
+        return $this->getService($class);
     }
 
     /**
-     * @param \ReflectionClass $class
+     * @param string $class
      * @return object
      * @throws NewInstanceException
-     * @throws InstantiatorException
      */
     private function instantiate(string $class)
     {
@@ -254,7 +259,7 @@ class Instantiator
      * @param int $number
      * @return mixed
      * @throws ClassNotFoundException
-     * @throws InstantiatorException
+     * @throws ServiceManagerException
      * @throws InterfaceWithoutAliasException
      * @throws NotAnObjectException
      * @throws ParamValueException
@@ -290,7 +295,7 @@ class Instantiator
             }
 
             // instantiating the class
-            return $this->getInstance($param->getType()->getName());
+            return $this->getService($param->getType()->getName());
         }
 
         // optionnal param

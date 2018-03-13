@@ -17,11 +17,11 @@
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
 // Time:     17:02
-// Project:  lib-instantiator
+// Project:  lib-servicemanager
 //
 declare(strict_types = 1);
-namespace CodeInc\Instantiator\Exceptions;
-use CodeInc\Instantiator\Instantiator;
+namespace CodeInc\ServiceManager\Exceptions;
+use CodeInc\ServiceManager\ServiceManager;
 use Throwable;
 
 
@@ -31,16 +31,16 @@ use Throwable;
  * @package CodeInc\ServiceManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class InterfaceWithoutAliasException extends InstantiatorException {
+class InterfaceWithoutAliasException extends ServiceManagerException {
 	/**
 	 * InterfaceWithoutAliasException constructor.
 	 *
 	 * @param string $interface
-	 * @param Instantiator $instantiator
+	 * @param ServiceManager $instantiator
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $interface, Instantiator $instantiator,
+	public function __construct(string $interface, ServiceManager $instantiator,
 		?int $code = null, ?Throwable $previous = null)
 	{
 		parent::__construct(

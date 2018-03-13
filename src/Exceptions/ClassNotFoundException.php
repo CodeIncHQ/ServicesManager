@@ -17,11 +17,11 @@
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
 // Time:     17:03
-// Project:  lib-instantiator
+// Project:  lib-servicemanager
 //
 declare(strict_types = 1);
-namespace CodeInc\Instantiator\Exceptions;
-use CodeInc\Instantiator\Instantiator;
+namespace CodeInc\ServiceManager\Exceptions;
+use CodeInc\ServiceManager\ServiceManager;
 use Throwable;
 
 
@@ -31,16 +31,16 @@ use Throwable;
  * @package CodeInc\ServiceManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class ClassNotFoundException extends InstantiatorException {
+class ClassNotFoundException extends ServiceManagerException {
 	/**
 	 * ServiceNotFoundException constructor.
 	 *
 	 * @param string $serviceClass
-	 * @param Instantiator $instantiator
+	 * @param ServiceManager $instantiator
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $serviceClass, Instantiator $instantiator,
+	public function __construct(string $serviceClass, ServiceManager $instantiator,
 		?int $code = null, ?Throwable $previous = null)
 	{
 		parent::__construct(

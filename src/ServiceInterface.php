@@ -15,48 +15,21 @@
 // +---------------------------------------------------------------------+
 //
 // Author:   Joan Fabrégat <joan@codeinc.fr>
-// Date:     12/03/2018
-// Time:     10:57
-// Project:  lib-instantiator
+// Date:     13/03/2018
+// Time:     10:22
+// Project:  lib-servicemanager
 //
 declare(strict_types = 1);
-namespace CodeInc\Instantiator\Exceptions;
-use CodeInc\Instantiator\Instantiator;
-use Throwable;
+namespace CodeInc\ServiceManager;
 
 
 /**
- * Class InstantiatorException
+ * Interface ServiceInterface
  *
- * @package CodeInc\ServiceManager\Exceptions
+ * @package CodeInc\ServiceManager
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class InstantiatorException extends \Exception {
-	/**
-	 * @var Instantiator
-	 */
-	private $instantiator;
+interface ServiceInterface
+{
 
-	/**
-	 * InstantiatorException constructor.
-	 *
-	 * @param string $message
-	 * @param Instantiator $instantiator
-	 * @param int|null $code
-	 * @param null|Throwable $previous
-	 */
-	public function __construct(string $message, Instantiator $instantiator,
-		?int $code = null, ?Throwable $previous = null)
-	{
-		$this->instantiator = $instantiator;
-		parent::__construct($message, $code ?? 0, $previous);
-	}
-
-	/**
-	 * @return Instantiator
-	 */
-	public function getInstantiator():Instantiator
-	{
-		return $this->instantiator;
-	}
 }

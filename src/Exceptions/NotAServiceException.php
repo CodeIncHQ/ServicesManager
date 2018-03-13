@@ -15,39 +15,39 @@
 // +---------------------------------------------------------------------+
 //
 // Author:   Joan Fabrégat <joan@codeinc.fr>
-// Date:     12/03/2018
-// Time:     17:00
+// Date:     13/03/2018
+// Time:     10:24
 // Project:  lib-servicemanager
 //
 declare(strict_types = 1);
 namespace CodeInc\ServiceManager\Exceptions;
+use CodeInc\ServiceManager\ServiceInterface;
 use CodeInc\ServiceManager\ServiceManager;
 use Throwable;
 
 
 /**
- * Class NotAnObjectException
+ * Class NotAServiceException
  *
  * @package CodeInc\ServiceManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class NotAnObjectException extends ServiceManagerException {
-	/**
-	 * NotAnObjectException constructor.
-	 *
-	 * @param string $varType
-	 * @param ServiceManager $instantiator
-	 * @param int|null $code
-	 * @param null|Throwable $previous
-	 */
-	public function __construct(string $varType, ServiceManager $instantiator,
-		?int $code = null, ?Throwable $previous = null)
-	{
-		parent::__construct(
-			sprintf("You can only add instantiated services (%s given)", $varType),
-			$instantiator,
-			$code,
-			$previous
-		);
-	}
+class NotAServiceException extends ServiceManagerException
+{
+    /**
+     * NotAServiceException constructor.
+     *
+     * @param string $class
+     * @param ServiceManager $instantiator
+     * @param int|null $code
+     * @param null|Throwable $previous
+     */
+    public function __construct(string $class, ServiceManager $instantiator,
+        ?int $code = null, ?Throwable $previous = null)
+    {
+        parent::__construct(
+            sprintf("The class %s is not a servce. All services must implement %s.",
+                $class, ServiceInterface::class),
+            $instantiator, $code, $previous);
+    }
 }
