@@ -1,6 +1,6 @@
 {
-  "name": "codeinc/servicesmanager",
-  "version": "1.0.1",
+  "name": "codeinc/services-manager",
+  "version": "1.0.2",
   "description": "PHP service manager",
   "homepage": "https://github.com/CodeIncHQ/ServicesManager",
   "type": "library",
