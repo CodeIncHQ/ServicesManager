@@ -16,38 +16,39 @@
 //
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
-// Time:     17:00
-// Project:  lib-servicemanager
+// Time:     18:03
+// Project:  lib-servicesmanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager\Exceptions;
-use CodeInc\ServiceManager\ServiceManager;
+namespace CodeInc\ServicesManager\Exceptions;
+use CodeInc\ServicesManager\ServicesManager;
 use Throwable;
 
 
 /**
- * Class NotAnObjectException
+ * Class NewInstanceException
  *
- * @package CodeInc\ServiceManager\Exceptions
+ * @package CodeInc\ServicesManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class NotAnObjectException extends ServiceManagerException {
-	/**
-	 * NotAnObjectException constructor.
-	 *
-	 * @param string $varType
-	 * @param ServiceManager $serviceManager
-	 * @param int|null $code
-	 * @param null|Throwable $previous
-	 */
-	public function __construct(string $varType, ServiceManager $serviceManager,
-		?int $code = null, ?Throwable $previous = null)
-	{
-		parent::__construct(
-			sprintf("You can only add instantiated objects (%s given)", $varType),
-			$serviceManager,
-			$code,
-			$previous
-		);
-	}
+class NewInstanceException extends ServicesManagerException
+{
+    /**
+     * NewInstanceException constructor.
+     *
+     * @param string $class
+     * @param ServicesManager $servicesManager
+     * @param int|null $code
+     * @param null|Throwable $previous
+     */
+    public function __construct(string $class, ServicesManager $servicesManager,
+        ?int $code = null, ?Throwable $previous = null)
+    {
+        parent::__construct(
+            sprintf("Error while instantiating the class %s", $class),
+            $servicesManager,
+            $code,
+            $previous
+        );
+    }
 }

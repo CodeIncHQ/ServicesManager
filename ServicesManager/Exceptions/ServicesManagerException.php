@@ -17,46 +17,46 @@
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
 // Time:     10:57
-// Project:  lib-servicemanager
+// Project:  lib-servicesmanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager\Exceptions;
-use CodeInc\ServiceManager\ServiceManager;
+namespace CodeInc\ServicesManager\Exceptions;
+use CodeInc\ServicesManager\ServicesManager;
 use Throwable;
 
 
 /**
- * Class ServiceManagerException
+ * Class ServicesManagerException
  *
- * @package CodeInc\ServiceManager\Exceptions
+ * @package CodeInc\ServicesManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class ServiceManagerException extends \Exception {
+class ServicesManagerException extends \Exception {
 	/**
-	 * @var ServiceManager
+	 * @var ServicesManager
 	 */
-	private $instantiator;
+	private $servicesManager;
 
 	/**
 	 * InstantiatorException constructor.
 	 *
 	 * @param string $message
-	 * @param ServiceManager $serviceManager
+	 * @param ServicesManager $servicesManager
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $message, ServiceManager $serviceManager,
+	public function __construct(string $message, ServicesManager $servicesManager,
 		?int $code = null, ?Throwable $previous = null)
 	{
-		$this->instantiator = $serviceManager;
+		$this->servicesManager = $servicesManager;
 		parent::__construct($message, $code ?? 0, $previous);
 	}
 
-	/**
-	 * @return ServiceManager
-	 */
-	public function getInstantiator():ServiceManager
-	{
-		return $this->instantiator;
-	}
+    /**
+     * @return ServicesManager
+     */
+    public function getServicesManager():ServicesManager
+    {
+        return $this->servicesManager;
+    }
 }

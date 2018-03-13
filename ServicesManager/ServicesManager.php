@@ -17,31 +17,31 @@
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
 // Time:     10:33
-// Project:  lib-servicemanager
+// Project:  lib-servicesmanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager;
-use CodeInc\ServiceManager\Exceptions\InterfaceWithoutAliasException;
-use CodeInc\ServiceManager\Exceptions\NotAnObjectException;
-use CodeInc\ServiceManager\Exceptions\NotAServiceException;
-use CodeInc\ServiceManager\Exceptions\ServiceManagerException;
-use CodeInc\ServiceManager\Exceptions\ClassNotFoundException;
+namespace CodeInc\ServicesManager;
+use CodeInc\ServicesManager\Exceptions\InterfaceWithoutAliasException;
+use CodeInc\ServicesManager\Exceptions\NotAnObjectException;
+use CodeInc\ServicesManager\Exceptions\NotAServiceException;
+use CodeInc\ServicesManager\Exceptions\ServicesManagerException;
+use CodeInc\ServicesManager\Exceptions\ClassNotFoundException;
 
 
 /**
- * Class ServiceManager
+ * Class ServicesManager
  *
- * @package CodeInc\ServiceManager
+ * @package CodeInc\ServicesManager
  * @author Joan Fabrégat <joan@codeinc.fr>
  * @todo add object type hint when min compatibility >= 7.2
  */
-class ServiceManager implements ServiceInterface
+class ServicesManager implements ServiceInterface
 {
     /**
      * Instantiated objects stack.
      *
-     * @see ServiceManager::addService()
-     * @see ServiceManager::getService()
+     * @see ServicesManager::addService()
+     * @see ServicesManager::getService()
      * @var object[]
      */
     private $services = [];
@@ -49,15 +49,15 @@ class ServiceManager implements ServiceInterface
     /**
      * Services aliases (other classes or interfaces)
      *
-     * @see ServiceManager::addAlias()
+     * @see ServicesManager::addAlias()
      * @var string[]
      */
     private $aliases = [];
 
     /**
-     * ServiceManager constructor.
+     * ServicesManager constructor.
      *
-     * @throws ServiceManagerException
+     * @throws ServicesManagerException
      * @throws \ReflectionException
      */
     public function __construct()
@@ -157,7 +157,7 @@ class ServiceManager implements ServiceInterface
      * @throws ClassNotFoundException
      * @throws InterfaceWithoutAliasException
      * @throws NotAnObjectException
-     * @throws ServiceManagerException
+     * @throws ServicesManagerException
      * @throws \ReflectionException
      */
     public function getService(string $class, ?array $dependencies = null)
@@ -200,10 +200,10 @@ class ServiceManager implements ServiceInterface
     /**
      * Alias of getInstance()
      *
-     * @uses ServiceManager::getService()
+     * @uses ServicesManager::getService()
      * @param string $class
      * @return object
-     * @throws ServiceManagerException
+     * @throws ServicesManagerException
      * @throws \ReflectionException
      */
     public function __invoke(string $class)

@@ -15,39 +15,21 @@
 // +---------------------------------------------------------------------+
 //
 // Author:   Joan Fabrégat <joan@codeinc.fr>
-// Date:     12/03/2018
-// Time:     17:03
-// Project:  lib-servicemanager
+// Date:     13/03/2018
+// Time:     10:22
+// Project:  lib-servicesmanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager\Exceptions;
-use CodeInc\ServiceManager\ServiceManager;
-use Throwable;
+namespace CodeInc\ServicesManager;
 
 
 /**
- * Class InexistantServiceClassException
+ * Interface ServiceInterface
  *
- * @package CodeInc\ServiceManager\Exceptions
+ * @package CodeInc\ServicesManager
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class ClassNotFoundException extends ServiceManagerException {
-	/**
-	 * ServiceNotFoundException constructor.
-	 *
-	 * @param string $serviceClass
-	 * @param ServiceManager $serviceManager
-	 * @param int|null $code
-	 * @param null|Throwable $previous
-	 */
-	public function __construct(string $serviceClass, ServiceManager $serviceManager,
-		?int $code = null, ?Throwable $previous = null)
-	{
-		parent::__construct(
-			sprintf("The class %s does not exist", $serviceClass),
-			$serviceManager,
-			$code,
-			$previous
-		);
-	}
+interface ServiceInterface
+{
+
 }

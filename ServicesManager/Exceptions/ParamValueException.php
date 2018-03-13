@@ -16,43 +16,47 @@
 //
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
-// Time:     17:02
-// Project:  lib-servicemanager
+// Time:     18:05
+// Project:  lib-servicesmanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager\Exceptions;
-use CodeInc\ServiceManager\ServiceManager;
+namespace CodeInc\ServicesManager\Exceptions;
+use CodeInc\ServicesManager\ServicesManager;
 use Throwable;
 
 
 /**
- * Class InterfaceWithoutAliasException
+ * Class ParamValueException
  *
- * @package CodeInc\ServiceManager\Exceptions
+ * @package CodeInc\ServicesManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class InterfaceWithoutAliasException extends ServiceManagerException {
-	/**
-	 * InterfaceWithoutAliasException constructor.
-	 *
-	 * @param string $interface
-	 * @param ServiceManager $serviceManager
-	 * @param int|null $code
-	 * @param null|Throwable $previous
-	 */
-	public function __construct(string $interface, ServiceManager $serviceManager,
-		?int $code = null, ?Throwable $previous = null)
-	{
-		parent::__construct(
-			sprintf("Unable to return an instance for the interface (%s), no alias found. "
-				."Use %s to map interfaces to classes or use %s to add a service implementing the "
-				."requested interface.",
-				$interface,
-				get_class($serviceManager)."::addAlias()",
-				get_class($serviceManager)."::addInstance()"),
-			$serviceManager,
-			$code,
-			$previous
-		);
-	}
+class ParamValueException extends ServicesManagerException
+{
+    /**
+     * ParamValueException constructor.
+     *
+     * @param string $className
+     * @param string $paramName
+     * @param int $paramNumber
+     * @param string $message
+     * @param ServicesManager $instantiator
+     * @param int|null $code
+     * @param null|Throwable $previous
+     */
+    public function __construct(string $className, string $paramName,
+        int $paramNumber, string $message, ServicesManager $instantiator,
+        ?int $code = null, ?Throwable $previous = null)
+    {
+        parent::__construct(
+            sprintf(
+                "Error while preparing the value of the parameter %s (#%s) "
+                ."of %s::__construct(): %s",
+                "\${$paramName}", $paramNumber, $className, $message
+            ),
+            $instantiator,
+            $code,
+            $previous
+        );
+    }
 }

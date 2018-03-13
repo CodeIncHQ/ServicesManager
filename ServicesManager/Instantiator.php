@@ -17,29 +17,29 @@
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     13/03/2018
 // Time:     10:28
-// Project:  lib-servicemanager
+// Project:  lib-servicesmanager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServiceManager;
-use CodeInc\ServiceManager\Exceptions\ClassNotFoundException;
-use CodeInc\ServiceManager\Exceptions\NewInstanceException;
-use CodeInc\ServiceManager\Exceptions\NotAnObjectException;
-use CodeInc\ServiceManager\Exceptions\ParamValueException;
+namespace CodeInc\ServicesManager;
+use CodeInc\ServicesManager\Exceptions\ClassNotFoundException;
+use CodeInc\ServicesManager\Exceptions\NewInstanceException;
+use CodeInc\ServicesManager\Exceptions\NotAnObjectException;
+use CodeInc\ServicesManager\Exceptions\ParamValueException;
 
 
 /**
  * Class Instantiator
  *
- * @package CodeInc\ServiceManager
+ * @package CodeInc\ServicesManager
  * @author Joan Fabrégat <joan@codeinc.fr>
  * @todo add object type hint when min compatibility >= 7.2
  */
 class Instantiator
 {
     /**
-     * @var ServiceManager
+     * @var ServicesManager
      */
-    private $serviceManager;
+    private $servicesManager;
 
     /**
      * @var array
@@ -49,25 +49,25 @@ class Instantiator
     /**
      * Instantiator constructor.
      *
-     * @param ServiceManager $serviceManager
+     * @param ServicesManager $servicesManager
      * @param array|null $dependencies
      * @throws NotAnObjectException
      */
-    public function __construct(ServiceManager $serviceManager,
+    public function __construct(ServicesManager $servicesManager,
         ?array $dependencies = null)
     {
-        $this->serviceManager = $serviceManager;
+        $this->ServicesManager = $servicesManager;
         if ($dependencies) {
             $this->addDependencies($dependencies);
         }
     }
 
     /**
-     * @return ServiceManager
+     * @return ServicesManager
      */
-    public function getServiceManager():ServiceManager
+    public function getServicesManager():ServicesManager
     {
-        return $this->serviceManager;
+        return $this->ServicesManager;
     }
 
     /**
@@ -79,7 +79,7 @@ class Instantiator
     public function addDependency($dependency):void
     {
         if (!is_object($dependency)) {
-            throw new NotAnObjectException($dependency, $this->serviceManager);
+            throw new NotAnObjectException($dependency, $this->ServicesManager);
         }
         $this->dependencies[get_class($dependency)] = $dependency;
     }
@@ -127,7 +127,7 @@ class Instantiator
     {
         // checks if the class exists
         if (!class_exists($class)) {
-            throw new ClassNotFoundException($class, $this->serviceManager);
+            throw new ClassNotFoundException($class, $this->ServicesManager);
         }
 
         // instantiate the class
@@ -145,7 +145,7 @@ class Instantiator
         catch (\Throwable $exception) {
             throw new NewInstanceException(
                 $class->getName(),
-                $this->serviceManager,
+                $this->ServicesManager,
                 null, $exception
             );
         }
@@ -161,7 +161,7 @@ class Instantiator
      * @throws Exceptions\ClassNotFoundException
      * @throws Exceptions\InterfaceWithoutAliasException
      * @throws Exceptions\NotAnObjectException
-     * @throws Exceptions\ServiceManagerException
+     * @throws Exceptions\ServicesManagerException
      * @throws ParamValueException
      * @throws \ReflectionException
      */
@@ -178,7 +178,7 @@ class Instantiator
                     $param->getName(),
                     $number,
                     "the parameter does not have a type hint",
-                    $this->serviceManager
+                    $this->ServicesManager
                 );
             }
 
@@ -191,7 +191,7 @@ class Instantiator
                     $number,
                     sprintf("the parameter type is not a class or an interface (type: %s)",
                         $paramClass),
-                    $this->serviceManager
+                    $this->ServicesManager
                 );
             }
 
@@ -201,7 +201,7 @@ class Instantiator
             }
 
             // else instantiating the class
-            return $this->serviceManager->getService($paramClass);
+            return $this->ServicesManager->getService($paramClass);
         }
 
         // optionnal param
