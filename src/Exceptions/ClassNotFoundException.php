@@ -16,8 +16,8 @@
 //
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
-// Time:     18:05
-// Project:  lib-servicesmanager
+// Time:     17:03
+// Project:  ServicesManager
 //
 declare(strict_types = 1);
 namespace CodeInc\ServicesManager\Exceptions;
@@ -26,37 +26,28 @@ use Throwable;
 
 
 /**
- * Class ParamValueException
+ * Class InexistantServiceClassException
  *
  * @package CodeInc\ServicesManager\Exceptions
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class ParamValueException extends ServicesManagerException
-{
-    /**
-     * ParamValueException constructor.
-     *
-     * @param string $className
-     * @param string $paramName
-     * @param int $paramNumber
-     * @param string $message
-     * @param ServicesManager $instantiator
-     * @param int|null $code
-     * @param null|Throwable $previous
-     */
-    public function __construct(string $className, string $paramName,
-        int $paramNumber, string $message, ServicesManager $instantiator,
-        ?int $code = null, ?Throwable $previous = null)
-    {
-        parent::__construct(
-            sprintf(
-                "Error while preparing the value of the parameter %s (#%s) "
-                ."of %s::__construct(): %s",
-                "\${$paramName}", $paramNumber, $className, $message
-            ),
-            $instantiator,
-            $code,
-            $previous
-        );
-    }
+class ClassNotFoundException extends ServicesManagerException {
+	/**
+	 * ServiceNotFoundException constructor.
+	 *
+	 * @param string $serviceClass
+	 * @param ServicesManager $servicesManager
+	 * @param int|null $code
+	 * @param null|Throwable $previous
+	 */
+	public function __construct(string $serviceClass, ServicesManager $servicesManager,
+		?int $code = null, ?Throwable $previous = null)
+	{
+		parent::__construct(
+			sprintf("The class %s does not exist", $serviceClass),
+			$servicesManager,
+			$code,
+			$previous
+		);
+	}
 }
