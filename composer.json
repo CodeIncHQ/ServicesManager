@@ -1,8 +1,8 @@
 {
-  "name": "codeinc/lib-servicemanager",
+  "name": "codeinc/lib-servicesmanager",
   "version": "1.1.0-dev",
   "description": "PHP service manager",
-  "homepage": "https://github.com/CodeIncHQ/lib-servicemanager",
+  "homepage": "https://github.com/CodeIncHQ/lib-servicesmanager",
   "type": "library",
   "license": "MIT",
   "require": {
