@@ -55,11 +55,6 @@ class ServiceManager implements ServiceInterface
     private $aliases = [];
 
     /**
-     * @var Instantiator
-     */
-    private $internalInstantiator;
-
-    /**
      * ServiceManager constructor.
      *
      * @throws ServiceManagerException
@@ -68,7 +63,6 @@ class ServiceManager implements ServiceInterface
     public function __construct()
     {
         $this->addService($this);
-        $this->internalInstantiator = new Instantiator($this);
     }
 
     /**
@@ -158,6 +152,7 @@ class ServiceManager implements ServiceInterface
      * returns the added instance.
      *
      * @param string $class
+     * @param array|null $dependencies
      * @return mixed
      * @throws ClassNotFoundException
      * @throws InterfaceWithoutAliasException
@@ -165,14 +160,14 @@ class ServiceManager implements ServiceInterface
      * @throws ServiceManagerException
      * @throws \ReflectionException
      */
-    public function getService(string $class)
+    public function getService(string $class, ?array $dependencies = null)
     {
         // if the class is an alias
         if ($alias = $this->getAlias($class)) {
             $class = $alias;
         }
 
-        // if there is an instance already available to the given class
+        // if there is an instance already available
         if (isset($this->services[$class])) {
             return $this->services[$class];
         }
@@ -193,7 +188,9 @@ class ServiceManager implements ServiceInterface
         }
 
         // if the class was never added or instantiated, we instantiate it
-        $instance = $this->internalInstantiator->instantiate($class);
+        $instantiator = $this->getInstantiator();
+        if ($dependencies) $instantiator->addDependencies($dependencies);
+        $instance = $instantiator->instantiate($class);
         $this->addService($instance);
         return $instance;
     }
@@ -220,25 +217,24 @@ class ServiceManager implements ServiceInterface
      */
     public function hasServiceInstance($class):bool
     {
+        // if the class is an object
         if (is_object($class)) {
             $class = get_class($class);
         }
 
-        if (isset($this->services[$class])) {
-            return  true;
-        }
-
+        // if the class is an alias
         if ($alias = $this->getAlias($class)) {
-            return $this->hasServiceInstance($alias);
+            $class = $alias;
         }
 
-        return false;
+        return isset($this->services[$class]);
     }
 
     /**
      * Returns a new instance of the instantiator.
      *
      * @return Instantiator
+     * @throws NotAnObjectException
      */
     public function getInstantiator():Instantiator
     {

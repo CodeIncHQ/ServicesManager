@@ -50,13 +50,16 @@ class Instantiator
      * Instantiator constructor.
      *
      * @param ServiceManager $serviceManager
-     * @param array $dependencies
+     * @param array|null $dependencies
+     * @throws NotAnObjectException
      */
     public function __construct(ServiceManager $serviceManager,
-        array $dependencies = [])
+        ?array $dependencies = null)
     {
         $this->serviceManager = $serviceManager;
-        $this->dependencies = $dependencies;
+        if ($dependencies) {
+            $this->addDependencies($dependencies);
+        }
     }
 
     /**
@@ -73,12 +76,23 @@ class Instantiator
      * @param $dependency
      * @throws NotAnObjectException
      */
-    public function addDependency($dependency)
+    public function addDependency($dependency):void
     {
         if (!is_object($dependency)) {
             throw new NotAnObjectException($dependency, $this->serviceManager);
         }
         $this->dependencies[get_class($dependency)] = $dependency;
+    }
+
+    /**
+     * @param array $dependencies
+     * @throws NotAnObjectException
+     */
+    public function addDependencies(array $dependencies):void
+    {
+        foreach ($dependencies as $dependency) {
+            $this->addDependency($dependency);
+        }
     }
 
     /**
