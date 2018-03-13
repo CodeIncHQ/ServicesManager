@@ -189,10 +189,12 @@ class ServiceManager implements ServiceInterface
 
         // if the class was never added or instantiated, we instantiate it
         $instantiator = $this->getInstantiator();
-        if ($dependencies) $instantiator->addDependencies($dependencies);
-        $instance = $instantiator->instantiate($class);
-        $this->addService($instance);
-        return $instance;
+        if ($dependencies) {
+            $instantiator->addDependencies($dependencies);
+        }
+        $service = $instantiator->instantiate($class);
+        $this->addService($service);
+        return $service;
     }
 
     /**
