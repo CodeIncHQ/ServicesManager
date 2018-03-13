@@ -22,8 +22,10 @@
 declare(strict_types = 1);
 namespace CodeInc\ServicesManager;
 use CodeInc\ServicesManager\Exceptions\InterfaceWithoutAliasException;
+use CodeInc\ServicesManager\Exceptions\NewInstanceException;
 use CodeInc\ServicesManager\Exceptions\NotAnObjectException;
 use CodeInc\ServicesManager\Exceptions\NotAServiceException;
+use CodeInc\ServicesManager\Exceptions\ParamValueException;
 use CodeInc\ServicesManager\Exceptions\ServicesManagerException;
 use CodeInc\ServicesManager\Exceptions\ClassNotFoundException;
 
@@ -188,17 +190,13 @@ class ServicesManager implements ServiceInterface
         }
 
         // if the class was never added or instantiated, we instantiate it
-        $instantiator = $this->getInstantiator();
-        if ($dependencies) {
-            $instantiator->addDependencies($dependencies);
-        }
-        $service = $instantiator->instantiate($class);
+        $service = $this->instantiate($class, $dependencies);
         $this->addService($service);
         return $service;
     }
 
     /**
-     * Alias of getInstance()
+     * Alias of getService()
      *
      * @uses ServicesManager::getService()
      * @param string $class
@@ -233,13 +231,83 @@ class ServicesManager implements ServiceInterface
     }
 
     /**
-     * Returns a new instance of the instantiator.
+     * Instantiate any class which requires services.
      *
-     * @return Instantiator
-     * @throws NotAnObjectException
+     * @param string $class
+     * @param object[] $dependencies
+     * @return object
+     * @throws NewInstanceException
+     * @throws ClassNotFoundException
      */
-    public function getInstantiator():Instantiator
+    public function instantiate(string $class, ?array $dependencies = null)
     {
-        return new Instantiator($this);
+        // checks if the class exists
+        if (!class_exists($class)) {
+            throw new ClassNotFoundException($class, $this);
+        }
+
+        // preparing the dependencies array
+        if ($dependencies) {
+            foreach ($dependencies as $key => $object) {
+                unset($dependencies[$key]);
+                $dependencies[get_class($object)] = $object;
+            }
+        }
+
+        // instantiate the class
+        try {
+            $class = new \ReflectionClass($class);
+            if ($class->hasMethod("__construct")) {
+                $args = [];
+                foreach ($class->getMethod("__construct")->getParameters() as $number => $param) {
+                    // if the param is required
+                    if (!$param->isOptional()) {
+
+                        // if the param type is not set
+                        if (!$param->hasType()) {
+                            throw new ParamValueException(
+                                $class->getName(), $param->getName(), $number + 1,
+                                "the parameter does not have a type hint", $this
+                            );
+                        }
+
+                        // if the param type is not a class
+                        $paramClass = $param->getType()->getName();
+                        if ($param->getType()->isBuiltin()) {
+                            throw new ParamValueException(
+                                $class->getName(), $param->getName(), $number + 1,
+                                sprintf("the parameter type is not a class or an interface (type: %s)",
+                                    $paramClass), $this
+                            );
+                        }
+
+                        // if the parameter value is available among the local dependencies
+                        if (isset($dependencies[$paramClass])) {
+                            return $dependencies[$paramClass];
+                        }
+
+                        // else instantiating the class
+                        return $this->getService($paramClass);
+                    }
+
+                    // optionnal param
+                    else {
+                        // if the param is optionnal returning it's default value
+                        return $param->getDefaultValue();
+                    }
+                }
+                return $class->newInstanceArgs($args);
+            }
+            else {
+                return $class->newInstance();
+            }
+        }
+        catch (\Throwable $exception) {
+            throw new NewInstanceException(
+                $class->getName(),
+                $this,
+                null, $exception
+            );
+        }
     }
 }
