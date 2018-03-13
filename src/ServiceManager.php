@@ -55,6 +55,11 @@ class ServiceManager implements ServiceInterface
     private $aliases = [];
 
     /**
+     * @var Instantiator
+     */
+    private $internalInstantiator;
+
+    /**
      * ServiceManager constructor.
      *
      * @throws ServiceManagerException
@@ -63,6 +68,7 @@ class ServiceManager implements ServiceInterface
     public function __construct()
     {
         $this->addService($this);
+        $this->internalInstantiator = new Instantiator($this);
     }
 
     /**
@@ -187,7 +193,7 @@ class ServiceManager implements ServiceInterface
         }
 
         // if the class was never added or instantiated, we instantiate it
-        $instance = $this->getInstantiator($class)->instantiate();
+        $instance = $this->internalInstantiator->instantiate($class);
         $this->addService($instance);
         return $instance;
     }
@@ -230,15 +236,12 @@ class ServiceManager implements ServiceInterface
     }
 
     /**
-     * Retourne l'instantiateur pour une class.
+     * Returns a new instance of the instantiator.
      *
-     * @param string $class
      * @return Instantiator
-     * @throws ClassNotFoundException
-     * @throws \ReflectionException
      */
-    public function getInstantiator(string $class):Instantiator
+    public function getInstantiator():Instantiator
     {
-        return new Instantiator($this, $class);
+        return new Instantiator($this);
     }
 }
