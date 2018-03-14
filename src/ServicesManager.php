@@ -228,6 +228,7 @@ class ServicesManager implements ServiceInterface
      * @return object
      * @throws NewInstanceException
      * @throws ClassNotFoundException
+     * @throws \ReflectionException
      */
     public function instantiate(string $class, ?array $dependencies = null)
     {
