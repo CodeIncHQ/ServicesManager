@@ -175,7 +175,7 @@ class ServicesManager implements ServiceInterface
         }
 
         // checks if the class is a service
-        if (is_subclass_of($class, ServiceInterface::class)) {
+        if (!is_subclass_of($class, ServiceInterface::class)) {
             throw new NotAServiceException($class, $this);
         }
 
