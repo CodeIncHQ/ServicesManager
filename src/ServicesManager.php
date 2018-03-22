@@ -25,6 +25,7 @@ use CodeInc\ServicesManager\Exceptions\InterfaceWithoutAliasException;
 use CodeInc\ServicesManager\Exceptions\NewInstanceException;
 use CodeInc\ServicesManager\Exceptions\NotAnObjectException;
 use CodeInc\ServicesManager\Exceptions\NotAServiceException;
+use CodeInc\ServicesManager\Exceptions\NotInstantiableException;
 use CodeInc\ServicesManager\Exceptions\ParamValueException;
 use CodeInc\ServicesManager\Exceptions\ServicesManagerException;
 use CodeInc\ServicesManager\Exceptions\ClassNotFoundException;
@@ -141,14 +142,14 @@ class ServicesManager implements ServiceInterface
      * returns the added instance.
      *
      * @param string $class
-     * @param array|null $dependencies
+     * @param object[] $dependencies
      * @return mixed
      * @throws ClassNotFoundException
      * @throws InterfaceWithoutAliasException
      * @throws NotAnObjectException
      * @throws ServicesManagerException
      */
-    public function getService(string $class, ?array $dependencies = null)
+    public function getService(string $class, array $dependencies = [])
     {
         // if the class is an alias
         if ($alias = $this->getAlias($class)) {
@@ -156,8 +157,13 @@ class ServicesManager implements ServiceInterface
         }
 
         // if there is an instance already available
-        if ($matchClass = $this->hasMatch($class, array_keys($this->services))) {
-            return $this->services[$matchClass];
+        if (isset($this->services[$class])) {
+            return $this->services[$class];
+        }
+        foreach ($this->services as $service) {
+            if ($service instanceof $class) {
+                return $service;
+            }
         }
 
         // checks if the class is an interface
@@ -179,27 +185,6 @@ class ServicesManager implements ServiceInterface
         $service = $this->instantiate($class, $dependencies);
         $this->addService($service);
         return $service;
-    }
-
-    /**
-     * Checks if a class is either a member of an array, a subclass of a
-     * member of an array.
-     *
-     * @param string $class
-     * @param array $classes
-     * @return null|string
-     */
-    private function hasMatch(string $class, array $classes):?string
-    {
-        if (in_array($class, $classes)) {
-            return $class;
-        }
-        foreach ($classes as $item) {
-            if (is_subclass_of($item, $class)) {
-                return $item;
-            }
-        }
-        return null;
     }
 
     /**
@@ -245,61 +230,23 @@ class ServicesManager implements ServiceInterface
      * @throws NewInstanceException
      * @throws ClassNotFoundException
      */
-    public function instantiate(string $class, ?array $dependencies = null)
+    public function instantiate(string $class, array $dependencies = [])
     {
         // checks if the class exists
         if (!class_exists($class)) {
             throw new ClassNotFoundException($class, $this);
         }
 
-        // instantiate the class
+        // instantiates the class
         try {
             $class = new \ReflectionClass($class);
             if (!$class->isInstantiable()) {
                 throw new NotInstantiableException($class, $this);
             }
             if ($class->hasMethod("__construct")) {
-                $args = [];
-                foreach ($class->getMethod("__construct")->getParameters() as $param) {
-                    // if the param is required
-                    if (!$param->isOptional()) {
-                        // if the param type is not set
-                        if (!$param->hasType()) {
-                            throw new ParamValueException(
-                                $class->getName(), $param->getName(), $param->getPosition() + 1,
-                                "the parameter does not have a type hint", $this
-                            );
-                        }
-
-                        // if the param type is not a class
-                        if ($param->getType()->isBuiltin()) {
-                            throw new ParamValueException(
-                                $class->getName(), $param->getName(), $param->getPosition() + 1,
-                                sprintf("the parameter type is not a class or an interface (type: %s)",
-                                    $param->getType()->getName()), $this
-                            );
-                        }
-
-                        // if the parameter value is available among the local dependencies
-                        $paramClass = $param->getClass()->getName();
-                        if ($dependencies
-                            && $matchParamClass = $this->hasMatch($paramClass, $dependencies)) {
-                            $args[] = $dependencies[$matchParamClass];
-                        }
-
-                        // else instantiating the class
-                        else {
-                            $args[] = $this->getService($paramClass);
-                        }
-                    }
-
-                    // optionnal param
-                    else {
-                        // if the param is optionnal returning it's default value
-                        $args[] = $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
-                    }
-                }
-                return $class->newInstanceArgs($args);
+                return $class->newInstanceArgs(
+                    $this->getConstructorArgs($class, $dependencies)
+                );
             }
             else {
                 return $class->newInstance();
@@ -312,5 +259,76 @@ class ServicesManager implements ServiceInterface
                 null, $exception
             );
         }
+    }
+
+    /**
+     * @param \ReflectionClass $class
+     * @param object[] $dependencies
+     * @return array
+     * @throws ClassNotFoundException
+     * @throws InterfaceWithoutAliasException
+     * @throws NotAnObjectException
+     * @throws ParamValueException
+     * @throws ServicesManagerException
+     */
+    private function getConstructorArgs(\ReflectionClass $class, array $dependencies):array
+    {
+        $args = [];
+        foreach ($class->getMethod("__construct")->getParameters() as $param) {
+            // if the param is required
+            if (!$param->isOptional()) {
+                // if the param type is not set
+                if (!$param->hasType()) {
+                    throw new ParamValueException(
+                        $class->getName(), $param->getName(), $param->getPosition() + 1,
+                        "the parameter does not have a type hint", $this
+                    );
+                }
+
+                // if the param type is not a class
+                if ($param->getType()->isBuiltin()) {
+                    throw new ParamValueException(
+                        $class->getName(), $param->getName(), $param->getPosition() + 1,
+                        sprintf("the parameter type is not a class or an interface (type: %s)",
+                            $param->getType()->getName()), $this
+                    );
+                }
+
+                // if the parameter value is available among the local dependencies
+                $paramClass = $param->getClass()->getName();
+                if ($dependency = $this->searchDependencies($paramClass, $dependencies)) {
+                    $args[] = $dependency;
+                }
+
+                // else instantiating the class
+                else {
+                    $args[] = $this->getService($paramClass);
+                }
+            }
+
+            // optionnal param
+            else {
+                // if the param is optionnal returning it's default value
+                $args[] = $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
+            }
+        }
+        return $args;
+    }
+
+    /**
+     * Searches for a class within a dependencies array.
+     *
+     * @param string $class
+     * @param object[] $dependencies
+     * @return object|null
+     */
+    private function searchDependencies(string $class, array $dependencies)
+    {
+        foreach ($dependencies as $dependency) {
+            if (is_object($dependency) && $dependency instanceof $class) {
+                return $dependency;
+            }
+        }
+        return null;
     }
 }
