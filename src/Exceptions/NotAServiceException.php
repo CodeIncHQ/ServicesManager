@@ -46,7 +46,7 @@ class NotAServiceException extends ServicesManagerException
         ?int $code = null, ?Throwable $previous = null)
     {
         parent::__construct(
-            sprintf("The class %s is not a servce. All services must implement %s.",
+            sprintf("The class %s is not a service. All services must implement %s.",
                 $class, ServiceInterface::class),
             $servicesManager, $code, $previous);
     }
