@@ -84,15 +84,6 @@ class ServicesManager implements ServiceInterface
 
         // adds the instance
         $this->services[get_class($instance)] = $instance;
-
-        // maps the class aliases (instances and parents)
-//        foreach ($this->getClassAliases($reflectionClass) as $alias) {
-//            $this->addAlias(
-//                $reflectionClass->getName(),
-//                $alias->getName(),
-//                false
-//            );
-//        }
     }
 
     /**
