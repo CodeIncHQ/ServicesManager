@@ -255,6 +255,9 @@ class ServicesManager implements ServiceInterface
         // instantiate the class
         try {
             $class = new \ReflectionClass($class);
+            if (!$class->isInstantiable()) {
+                throw new NotInstantiableException($class, $this);
+            }
             if ($class->hasMethod("__construct")) {
                 $args = [];
                 foreach ($class->getMethod("__construct")->getParameters() as $param) {
