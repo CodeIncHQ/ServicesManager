@@ -218,7 +218,17 @@ class ServicesManager implements ServiceInterface
             $class = $alias;
         }
 
-        return isset($this->services[$class]);
+        if (isset($this->services[$class])) {
+            return true;
+        }
+
+        foreach ($this->services as $service) {
+            if ($service instanceof $class) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
