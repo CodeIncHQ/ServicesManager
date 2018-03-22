@@ -1,6 +1,6 @@
 {
   "name": "codeinc/services-manager",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Services manager written in PHP 7",
   "homepage": "https://github.com/CodeIncHQ/ServicesManager",
   "type": "library",
