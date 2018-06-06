@@ -30,7 +30,7 @@ namespace CodeInc\ServicesManager;
  * @author Joan Fabrégat <joan@codeinc.fr>
  * @todo add object type hint when min compatibility >= 7.2
  */
-class ServicesManager implements ServiceInterface
+class ServicesManager
 {
     /**
      * Instantiated objects stack.
@@ -43,6 +43,9 @@ class ServicesManager implements ServiceInterface
 
     /**
      * ServicesManager constructor.
+     *
+     * @throws InstantiatorException
+     * @throws ServicesManagerException
      */
     public function __construct()
     {
@@ -52,36 +55,39 @@ class ServicesManager implements ServiceInterface
     /**
      * Adds a service.
      *
-     * @param $service
-     */
-    public function registerService($service):void
-    {
-        $this->services[get_class($service)] = $service;
-    }
-
-    /**
-     * Adds a service.
-     *
-     * @param string $serviceClass
+     * @param object|string $service Instantiated service or service class.
      * @param array $dependencies
+     * @param bool $replace
      * @throws InstantiatorException
      * @throws ServicesManagerException
      */
-    public function registerServiceClass(string $serviceClass, array $dependencies = []):void
+    public function registerService($service, array $dependencies = [], bool $replace = false):void
     {
-        $service = $this->instantiate($serviceClass, $dependencies);
-        $this->services[$serviceClass] = $service;
+        if (is_object($service)) {
+            $class = get_class($service);
+        }
+        else {
+            $class = $service;
+            $service = $this->instantiate($service, $dependencies);
+        }
+
+        if (array_key_exists($class, $this->services) && !$replace) {
+            throw new ServicesManagerException(
+                sprintf("The service '%s' is already registered", $class),
+                $this
+            );
+        }
+        $this->services[$class] = $service;
     }
 
     /**
-     * Verifies if an alias exist for a class / interface.
+     * Returns the registered services.
      *
-     * @param string $class
-     * @return bool
+     * @return object[]
      */
-    public function hasAlias(string $class):bool
+    public function getRegisteredServices():array
     {
-        return isset($this->aliases[$class]);
+        return $this->services;
     }
 
     /**

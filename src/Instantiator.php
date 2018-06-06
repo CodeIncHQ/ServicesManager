@@ -42,7 +42,7 @@ class Instantiator
     private $reflectionClass;
 
     /** @var object[] */
-    private $constructorDependencies;
+    private $constructorDependencies = [];
 
     /**
      * Instantiator constructor.
@@ -52,7 +52,8 @@ class Instantiator
      * @param object[] $constructorDependencies
      * @throws InstantiatorException
      */
-    public function __construct(ServicesManager $servicesManager, string $class, array $constructorDependencies = [])
+    public function __construct(ServicesManager $servicesManager, string $class,
+        ?array $constructorDependencies = null)
     {
         try {
             if (!class_exists($class)) {
@@ -64,7 +65,9 @@ class Instantiator
             $this->serviceManager = $servicesManager;
             $this->class = $class;
             $this->reflectionClass = new \ReflectionClass($class);
-            $this->setConstructorDependencies($constructorDependencies);
+            if ($constructorDependencies) {
+                $this->setConstructorDependencies($constructorDependencies);
+            }
         }
         catch (\Throwable $exception) {
             throw new InstantiatorException("Error while loading the Instantiator",
@@ -191,7 +194,7 @@ class Instantiator
 
                     // if the parameter value is available among the local dependencies
                     $paramClass = $constructorParam->getClass()->getName();
-                    if ($dependency = $this->searchDependencies($paramClass, $this->constructorDependencies)) {
+                    if ($dependency = $this->searchDependencies($paramClass)) {
                         $constructorArgs[] = $dependency;
                     }
 
@@ -213,7 +216,7 @@ class Instantiator
         }
         catch (\Throwable $exception) {
             throw new InstantiatorException(
-                sprintf("Unable assemble the %s method parameters.",
+                sprintf("Unable to assemble the %s method parameters.",
                     $this->class.'::__construct()'),
                 $this, 0, $exception
             );
@@ -224,12 +227,11 @@ class Instantiator
      * Searches for a class within a dependencies array.
      *
      * @param string $class
-     * @param object[] $dependencies
      * @return object|null
      */
-    private function searchDependencies(string $class, array $dependencies)
+    private function searchDependencies(string $class)
     {
-        foreach ($dependencies as $dependency) {
+        foreach ($this->constructorDependencies as $dependency) {
             if (is_object($dependency) && $dependency instanceof $class) {
                 return $dependency;
             }
