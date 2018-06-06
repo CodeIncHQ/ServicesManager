@@ -3,7 +3,7 @@
 // +---------------------------------------------------------------------+
 // | CODE INC. SOURCE CODE                                               |
 // +---------------------------------------------------------------------+
-// | Copyright (c) 2017 - Code Inc. SAS - All Rights Reserved.           |
+// | Copyright (c) 2018 - Code Inc. SAS - All Rights Reserved.           |
 // | Visit https://www.codeinc.fr for more information about licensing.  |
 // +---------------------------------------------------------------------+
 // | NOTICE:  All information contained herein is, and remains the       |
@@ -15,40 +15,48 @@
 // +---------------------------------------------------------------------+
 //
 // Author:   Joan Fabrégat <joan@codeinc.fr>
-// Date:     12/03/2018
-// Time:     18:03
+// Date:     06/06/2018
+// Time:     12:09
 // Project:  ServicesManager
 //
-declare(strict_types = 1);
-namespace CodeInc\ServicesManager\Exceptions;
-use CodeInc\ServicesManager\ServicesManager;
+declare(strict_types=1);
+namespace CodeInc\ServicesManager;
 use Throwable;
 
 
 /**
- * Class NewInstanceException
+ * Class InstantiatorException
  *
- * @package CodeInc\ServicesManager\Exceptions
- * @author Joan Fabrégat <joan@codeinc.fr>
+ * @package CodeInc\ServicesManager
+ * @author  Joan Fabrégat <joan@codeinc.fr>
  */
-class NewInstanceException extends ServicesManagerException
+class InstantiatorException extends ServicesManagerException
 {
     /**
-     * NewInstanceException constructor.
+     * @var Instantiator
+     */
+    private $instantiator;
+
+    /**
+     * InstantiatorException constructor.
      *
-     * @param string $class
-     * @param ServicesManager $servicesManager
-     * @param int|null $code
+     * @param string $message
+     * @param Instantiator $instantiator
+     * @param int $code
      * @param null|Throwable $previous
      */
-    public function __construct(string $class, ServicesManager $servicesManager,
-        ?int $code = null, ?Throwable $previous = null)
+    public function __construct(string $message, Instantiator $instantiator,
+        int $code = 0, ?Throwable $previous = null)
     {
-        parent::__construct(
-            sprintf("Error while instantiating the class %s", $class),
-            $servicesManager,
-            $code,
-            $previous
-        );
+        $this->instantiator = $instantiator;
+        parent::__construct($message, $instantiator->getServiceManager(), $code, $previous);
+    }
+
+    /**
+     * @return Instantiator
+     */
+    public function getInstantiator():Instantiator
+    {
+        return $this->instantiator;
     }
 }

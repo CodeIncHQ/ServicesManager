@@ -3,7 +3,7 @@
 // +---------------------------------------------------------------------+
 // | CODE INC. SOURCE CODE                                               |
 // +---------------------------------------------------------------------+
-// | Copyright (c) 2017 - Code Inc. SAS - All Rights Reserved.           |
+// | Copyright (c) 2017-2018 - Code Inc. SAS - All Rights Reserved.      |
 // | Visit https://www.codeinc.fr for more information about licensing.  |
 // +---------------------------------------------------------------------+
 // | NOTICE:  All information contained herein is, and remains the       |
@@ -16,43 +16,47 @@
 //
 // Author:   Joan Fabrégat <joan@codeinc.fr>
 // Date:     12/03/2018
-// Time:     17:02
+// Time:     10:57
 // Project:  ServicesManager
 //
 declare(strict_types = 1);
-namespace CodeInc\ServicesManager\Exceptions;
-use CodeInc\ServicesManager\ServicesManager;
+namespace CodeInc\ServicesManager;
 use Throwable;
 
 
 /**
- * Class InterfaceWithoutAliasException
+ * Class ServicesManagerException
  *
- * @package CodeInc\ServicesManager\Exceptions
- * @author Joan Fabrégat <joan@codeinc.fr>
+ * @package CodeInc\ServicesManager
+ * @author  Joan Fabrégat <joan@codeinc.fr>
  */
-class InterfaceWithoutAliasException extends ServicesManagerException {
+class ServicesManagerException extends \Exception
+{
 	/**
-	 * InterfaceWithoutAliasException constructor.
+	 * @var ServicesManager
+	 */
+	private $servicesManager;
+
+	/**
+	 * InstantiatorException constructor.
 	 *
-	 * @param string $interface
+	 * @param string $message
 	 * @param ServicesManager $servicesManager
 	 * @param int|null $code
 	 * @param null|Throwable $previous
 	 */
-	public function __construct(string $interface, ServicesManager $servicesManager,
-		?int $code = null, ?Throwable $previous = null)
+	public function __construct(string $message, ServicesManager $servicesManager,
+		int $code = 0, ?Throwable $previous = null)
 	{
-		parent::__construct(
-			sprintf("Unable to return an instance for the interface (%s), no alias found. "
-				."Use %s to map interfaces to classes or use %s to add a service implementing the "
-				."requested interface.",
-				$interface,
-				get_class($servicesManager)."::addAlias()",
-				get_class($servicesManager)."::addInstance()"),
-			$servicesManager,
-			$code,
-			$previous
-		);
+		$this->servicesManager = $servicesManager;
+		parent::__construct($message, $code ?? 0, $previous);
 	}
+
+    /**
+     * @return ServicesManager
+     */
+    public function getServicesManager():ServicesManager
+    {
+        return $this->servicesManager;
+    }
 }

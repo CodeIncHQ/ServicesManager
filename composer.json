@@ -1,6 +1,6 @@
 {
   "name": "codeinc/services-manager",
-  "version": "1.0.7",
+  "version": "2.0.0-beta.1",
   "description": "Services manager written in PHP 7",
   "homepage": "https://github.com/CodeIncHQ/ServicesManager",
   "type": "library",
@@ -10,7 +10,7 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^7",
-    "codeinc/error-renderer": "^1.2"
+    "codeinc/error-renderer": "^1"
   },
   "autoload": {
     "psr-4": {"CodeInc\\ServicesManager\\": "src/"}

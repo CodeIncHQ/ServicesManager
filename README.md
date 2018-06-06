@@ -7,10 +7,9 @@ The library is intended to be used as a services manager. It is written in PHP 7
 ```php
 <?php
 use CodeInc\ServicesManager\ServicesManager;
-use CodeInc\ServicesManager\ServiceInterface;
 
 // a first service
-class MyFirstService implements ServiceInterface 
+class ServiceA  
 {
 	public function hello(string $name):void
 	{
@@ -19,35 +18,35 @@ class MyFirstService implements ServiceInterface
 }
 
 // a second service using the first service
-class MySecondService implements ServiceInterface
+class ServiceB 
  {
 	/** @var MyFirstService */
-	private $myFirstClass;
+	private $serviceA;
 	
-	public function __construct(MyFirstService $myFirstClass) 
+	public function __construct(ServiceA $serviceA) 
 	{
-		$this->myFirstClass = $myFirstClass;
+		$this->serviceA = $serviceA;
 	}
 	
 	public function helloWorld():void
 	{
-		$this->myFirstClass->hello("World");
+		$this->serviceA->hello("World");
 	}
 }
 
 // calling the second service, the service manager is going to first instantiated MyFirstService
 // then instantiate MySecondService with MyFirstService as a parameter.
 $serviceManager = new ServicesManager();
-$mySecondService = $serviceManager->getService(MySecondService::class);
-$mySecondService->helloWorld();
+$serviceB = $serviceManager->getService(ServiceB::class);
+$serviceB->helloWorld();
 
 // you also can add external objects to makes them available to the servides,
-// for instance a PSR-7 ServerRequest object or Doctrine's EntityManager.
+// for instance Doctrine's EntityManager.
 $serviceManager->addService($entityManager);
 
 // the service manager will pass the instance of the service manager added
 // using addService()
-class MyThirdService {
+class ServiceC {
     public function __construct(EntityManager $entityManager) { }
 }
 
